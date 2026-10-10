@@ -36,7 +36,7 @@
     }
 
     function begin(kind, silent) {
-      S.kind = kind; S.i = 0; S.answers = {}; S.started = Date.now(); S.view = 'q'; S.rid = A.uid(); S.queue = null; S.finished = false;
+      S.kind = kind; S.i = 0; S.answers = {}; S.started = Date.now(); S.view = 'q'; S.rid = A.uid(); S.finished = false; S.nextSave = null; S.completeData = null;
       if (fixedCountry) { S.answers.country = fixedCountry; S.i = 1; } // country already known from the link
       if (!silent) render();
     }
@@ -50,7 +50,7 @@
     function send(kind, data, onOk) {
       S.pending = { kind: kind, data: data, onOk: onOk };
       S.error = false; S.sending = true; render();
-      (S.queue || Promise.resolve()).then(function () { return A.submit(kind, data); }).then(function () {
+      A.submit(kind, data).then(function () {
         S.sending = false; S.pending = null; onOk(data);
       }).catch(function () {
         S.sending = false; S.error = true; render();
@@ -66,15 +66,30 @@
     }
 
     // Saves the answers given so far, so nothing is lost if the person closes the page.
-    // Saves run one after another; a failed one is skipped quietly.
+    // Only one save is in flight at a time; if more answers come in meanwhile, just the latest
+    // snapshot is sent next (each save carries all answers so far), so saves never pile up.
     function savePartial(field) {
-      var data = withAnswers(payload({ id: S.rid, status: 'partial', last_q: field, step: String(S.i + 1) }));
-      var kind = S.kind;
-      S.queue = (S.queue || Promise.resolve()).then(function () { return A.submit(kind, data).catch(function () {}); });
+      if (S.finished) return;
+      S.nextSave = { kind: S.kind, data: withAnswers(payload({ id: S.rid, status: 'partial', last_q: field, step: String(S.i + 1) })) };
+      pumpSaves();
+    }
+    function pumpSaves() {
+      if (S.saving || !S.nextSave || S.finished) return;
+      var job = S.nextSave; S.nextSave = null; S.saving = true;
+      A.submit(job.kind, job.data).catch(function () {}).then(function () { S.saving = false; pumpSaves(); });
+    }
+
+    // The finished survey is sent in the background, so the person moves on straight away.
+    // It retries a few times, and is sent once more if the page is closed before it got through.
+    function sendComplete(kind, data, tries) {
+      tries = tries || 0;
+      A.submit(kind, data).then(function (d) { S.completeSent = true; if (d && d.id) S.ids[kind] = d.id; })
+        .catch(function () { if (tries < 4) setTimeout(function () { sendComplete(kind, data, tries + 1); }, 1500 * (tries + 1)); });
     }
 
     // If the person leaves mid-survey (closes the tab, switches app), send what they answered so far one last time
     function flushOnLeave() {
+      if (S.completeData && !S.completeSent) { A.beacon(S.completeData.kind, S.completeData.data); return; }
       if (!S.kind || S.finished || !S.rid) return;
       if (!A.FLOWS[S.kind].some(function (f) { return f !== 'country' && S.answers[f] !== undefined; })) return;
       A.beacon(S.kind, withAnswers(payload({ id: S.rid, status: 'partial', last_q: A.FLOWS[S.kind][S.i] || '', step: String(S.i + 1) })));
@@ -85,12 +100,12 @@
     function finishSurvey() {
       var kind = S.kind, field = A.FLOWS[kind][S.i];
       var data = withAnswers(payload({ id: S.rid, status: 'complete', last_q: field, step: String(S.i + 1) }));
-      send(kind, data, function (d) {
-        S.finished = true;
-        S.ids[kind] = d.id;
-        if (kind === 'resident') go(d.r_area === 'outside' ? 'out' : 'r_done');
-        else go(d.b_pilot === 'no' ? 'b_no' : 'commit');
-      });
+      S.finished = true; S.nextSave = null; S.completeSent = false;
+      S.completeData = { kind: kind, data: data };
+      S.ids[kind] = S.rid;
+      sendComplete(kind, data);
+      if (kind === 'resident') go(data.r_area === 'outside' ? 'out' : 'r_done');
+      else go(data.b_pilot === 'no' ? 'b_no' : 'commit');
     }
 
     // ---------- Rendering ----------
