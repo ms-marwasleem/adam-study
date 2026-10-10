@@ -46,7 +46,13 @@
     btype: ['نوع النشاط', 'Business type'], role: ['الدور', 'Role'], branches: ['عدد الفروع', 'Branches'], bage: ['مدة العمل في البلد', 'Years operating in the country'],
     channels: ['قنوات العملاء الجدد', 'New-customer channels'], wom: ['نسبة العملاء بالترشيح', 'Share from recommendations'],
     challenge: ['التحدي الأكبر', 'Hardest challenge'], spend: ['الإنفاق الشهري', 'Monthly spend'], pay: ['طريقة الدفع', 'Preferred payment'],
-    pilot: ['الاهتمام بالتجربة', 'Pilot interest'], priority: ['احتمال الاستخدام 1–10', 'Likelihood to use 1–10'],
+    pilot: ['الاهتمام بالتجربة', 'Pilot interest'],
+    satisfaction: ['الرضا عن طرق البحث', 'Satisfaction with searching'], interest: ['الاهتمام بوسيلة أسرع', 'Interest in a faster way'],
+    features: ['ما يشجع على التجربة', 'What would get them to try'], free: ['التجربة لو مجانية', 'Would try if free'], rpay: ['الدفع مقابل مزايا', 'Pay for extras'],
+    update: ['تحديث المعلومات', 'Keeping info updated'], wrong_info: ['مشكلات معلومات خاطئة', 'Wrong-info problems'],
+    inquiries: ['الاستفسارات المتكررة', 'Repeat questions'], inq_time: ['وقت الرد يومياً', 'Daily time answering'],
+    tools: ['أدوات رقمية', 'Digital tools'], tools_sat: ['الرضا عن الأدوات', 'Tool satisfaction'],
+    goals: ['أهداف 12 شهراً', '12-month goals'], success: ['معايير فائدة الأداة', 'What makes a tool worth it'], priority: ['احتمال الاستخدام 1–10', 'Likelihood to use 1–10'],
     rows: ['{n} صف', '{n} rows'], csv: ['تنزيل CSV', 'Download CSV'], search: ['بحث بالاسم أو البريد…', 'Search name or email…'],
     none: ['لا توجد بيانات بعد', 'No data yet'],
     demo: ['وضع تجريبي: بيانات وهمية، والصفحة غير مربوطة بالشيت بعد.', 'Demo mode: sample data, not connected yet.'],
@@ -269,11 +275,16 @@
         panel(L('recos'), bars(r.recos, n, 'r_recos', { order: 'schema', highlight: ['3_5', '6p'] })),
         panel(L('disappoint'), bars(r.disappoint, n, 'r_disappoint', { order: 'schema', highlight: ['often', 'sometimes'] })),
         panel(L('category'), bars(r.category, n, 'r_category')),
+        panel(L('satisfaction'), bars(r.satisfaction, n, 'r_satisfaction', { order: 'schema', highlight: ['unsat', 'very_unsat'] })),
+        panel(L('interest'), bars(r.interest, n, 'r_interest', { order: 'schema', highlight: ['very', 'somewhat'] })),
+        panel(L('features'), bars(r.features, n, 'r_features')),
+        panel(L('free'), bars(r.free, n, 'r_free', { order: 'schema', highlight: ['definitely', 'likely'] })),
+        panel(L('rpay'), bars(r.pay, n, 'r_pay', { order: 'schema', highlight: ['yes', 'maybe'] })),
         dropoff(D.Residents, A.FLOWS.resident),
         panel(L('trust_by_status'), C.bars(crossPct, 100, { field: 'r_status', lang: lang, order: 'schema', raw: false, labeler: function (k) { return A.label('r_status', k, lang) + ' (n=' + base[k] + ')'; } }))
       ]));
       main.appendChild(head(L('t_res')));
-      main.appendChild(table('residents', ['ts', 'country', 'status', 'r_area', 'r_status', 'r_age', 'r_category', 'r_sources', 'r_trust', 'r_pain', 'r_recos', 'r_disappoint', 'src', 'lang', 'device', 'dur', 'flag'], D.Residents, { status: statusTag }));
+      main.appendChild(table('residents', ['ts', 'country', 'status', 'r_area', 'r_status', 'r_age', 'r_category', 'r_sources', 'r_trust', 'r_pain', 'r_recos', 'r_disappoint', 'r_satisfaction', 'r_interest', 'r_features', 'r_free', 'r_pay', 'src', 'lang', 'device', 'dur', 'flag'], D.Residents, { status: statusTag }));
     }
 
     function vBusinesses(main, D, S) {
@@ -284,6 +295,10 @@
         panel(L('branches'), bars(b.branches, n, 'b_branches', { order: 'schema' })), panel(L('bage'), bars(b.age, n, 'b_age', { order: 'schema' })),
         panel(L('channels'), bars(b.channels, n, 'b_channels', { highlight: ['wom'] })), panel(L('wom'), bars(b.wom, n, 'b_wom', { order: 'schema' })),
         panel(L('challenge'), bars(b.challenge, n, 'b_challenge')), panel(L('spend'), bars(b.spend, n, 'b_spend', { order: 'schema' })),
+        panel(L('update'), bars(b.update, n, 'b_update', { order: 'schema' })), panel(L('wrong_info'), bars(b.wrong_info, n, 'b_wrong_info', { order: 'schema', highlight: ['often', 'sometimes'] })),
+        panel(L('inquiries'), bars(b.inquiries, n, 'b_inquiries')), panel(L('inq_time'), bars(b.inq_time, n, 'b_inq_time', { order: 'schema', highlight: ['1_3', '3p'] })),
+        panel(L('tools'), bars(b.tools, n, 'b_tools', { order: 'schema' })), panel(L('tools_sat'), bars(b.tools_sat, n, 'b_tools_sat', { order: 'schema' })),
+        panel(L('goals'), bars(b.goals, n, 'b_goals')), panel(L('success'), bars(b.success, n, 'b_success')),
         panel(L('pay'), bars(b.pay, n, 'b_pay')), panel(L('pilot'), bars(b.pilot, n, 'b_pilot', { order: 'schema' })),
         panel(L('priority'), el('div', null, [C.columns(b.priority, 1, 10), el('p', { class: 'sub', style: 'margin-top:8px', text: 'avg ' + (b.priority_avg || '–') })])),
         dropoff(D.Businesses, A.FLOWS.business)
@@ -291,7 +306,7 @@
       var com = {}; D.Commitments.forEach(function (x) { if (x.survey_id) com[x.survey_id] = x; });
       var list = D.Businesses.map(function (x) { return Object.assign({}, x, { c_business: com[x.id] ? com[x.id].c_business : '', committed: com[x.id] ? 'yes' : '' }); });
       main.appendChild(head(L('t_biz')));
-      main.appendChild(table('businesses', ['ts', 'country', 'status', 'c_business', 'committed', 'b_type', 'b_role', 'b_branches', 'b_age', 'b_channels', 'b_wom', 'b_challenge', 'b_spend', 'b_priority', 'b_pay', 'b_pilot', 'src', 'lang', 'flag'], list, { committed: yesTag, status: statusTag }));
+      main.appendChild(table('businesses', ['ts', 'country', 'status', 'c_business', 'committed', 'b_type', 'b_role', 'b_branches', 'b_age', 'b_channels', 'b_wom', 'b_update', 'b_wrong_info', 'b_inquiries', 'b_inq_time', 'b_challenge', 'b_spend', 'b_tools', 'b_tools_sat', 'b_goals', 'b_priority', 'b_success', 'b_pay', 'b_pilot', 'src', 'lang', 'flag'], list, { committed: yesTag, status: statusTag }));
     }
 
     function vWaitlist(main, D) {

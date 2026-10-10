@@ -36,7 +36,7 @@
     }
 
     function begin(kind, silent) {
-      S.kind = kind; S.i = 0; S.answers = {}; S.started = Date.now(); S.view = 'q'; S.rid = A.uid(); S.queue = null;
+      S.kind = kind; S.i = 0; S.answers = {}; S.started = Date.now(); S.view = 'q'; S.rid = A.uid(); S.queue = null; S.finished = false;
       if (fixedCountry) { S.answers.country = fixedCountry; S.i = 1; } // country already known from the link
       if (!silent) render();
     }
@@ -73,10 +73,20 @@
       S.queue = (S.queue || Promise.resolve()).then(function () { return A.submit(kind, data).catch(function () {}); });
     }
 
+    // If the person leaves mid-survey (closes the tab, switches app), send what they answered so far one last time
+    function flushOnLeave() {
+      if (!S.kind || S.finished || !S.rid) return;
+      if (!A.FLOWS[S.kind].some(function (f) { return f !== 'country' && S.answers[f] !== undefined; })) return;
+      A.beacon(S.kind, withAnswers(payload({ id: S.rid, status: 'partial', last_q: A.FLOWS[S.kind][S.i] || '', step: String(S.i + 1) })));
+    }
+    window.addEventListener('pagehide', flushOnLeave);
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') flushOnLeave(); });
+
     function finishSurvey() {
       var kind = S.kind, field = A.FLOWS[kind][S.i];
       var data = withAnswers(payload({ id: S.rid, status: 'complete', last_q: field, step: String(S.i + 1) }));
       send(kind, data, function (d) {
+        S.finished = true;
         S.ids[kind] = d.id;
         if (kind === 'resident') go(d.r_area === 'outside' ? 'out' : 'r_done');
         else go(d.b_pilot === 'no' ? 'b_no' : 'commit');
@@ -324,8 +334,14 @@
         .map(function (o) { return el('option', { value: o[0], text: o[1 + li] }); }));
       [f.name, f.title, f.business, f.cr].forEach(function (x) { form.appendChild(x.node); });
       form.appendChild(el('div', { class: 'field' }, [el('label', { for: 'c_area', text: L('c_area') }), area]));
+      form.appendChild(el('p', { class: 'field-hint', id: 'c_contact_hint', text: L('c_contact_hint') }));
       form.appendChild(f.email.node); form.appendChild(f.phone.node);
 
+      [f.email, f.phone].forEach(function (x) {
+        x.input.addEventListener('input', function () {
+          [f.email, f.phone].forEach(function (y) { if (y.err.textContent === L('need_contact')) showErr(y, ''); });
+        });
+      });
       form.appendChild(honeypot());
       form.appendChild(el('button', { class: 'btn block', type: 'submit', text: L('c_submit') }));
 
@@ -335,13 +351,19 @@
         ['name', 'title', 'business'].forEach(function (k) {
           var v = f[k].input.value.trim(); showErr(f[k], v ? '' : L('req')); if (!v) ok = false;
         });
-        var em = f.email.input.value.trim();
-        showErr(f.email, !em ? L('req') : (validEmail(em) ? '' : L('bad_email'))); if (!validEmail(em)) ok = false;
+        // Email or mobile: at least one, and whichever is filled must look right
+        var em = f.email.input.value.trim(), ph = f.phone.input.value.trim();
+        var phOk = !ph || ph.replace(/[^0-9]/g, '').length >= 7;
+        if (!em && !ph) { showErr(f.email, L('need_contact')); showErr(f.phone, L('need_contact')); ok = false; }
+        else {
+          showErr(f.email, em && !validEmail(em) ? L('bad_email') : ''); if (em && !validEmail(em)) ok = false;
+          showErr(f.phone, phOk ? '' : L('bad_phone')); if (!phOk) ok = false;
+        }
         if (!ok) { var bad = form.querySelector('[aria-invalid="true"]'); if (bad) bad.focus(); return; }
         send('commitment', payload({
           survey_id: S.ids.business || '', b_type: S.answers.b_type || '',
           c_name: f.name.input.value.trim(), c_title: f.title.input.value.trim(), c_business: f.business.input.value.trim(),
-          c_cr: f.cr.input.value.trim(), c_area: area.value, c_email: em, c_phone: f.phone.input.value.trim(),
+          c_cr: f.cr.input.value.trim(), c_area: area.value, c_email: em, c_phone: ph,
           hp: form.querySelector('#website').value
         }), function (d) { S.ids.commitment = d.id; go('c_done'); });
       });

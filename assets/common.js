@@ -53,6 +53,25 @@
       ['0', 'ولا مرة', 'Never'], ['1_2', 'مرة أو مرتين', 'Once or twice'], ['3_5', 'من 3 إلى 5 مرات', '3 to 5 times'], ['6p', '6 مرات أو أكثر', '6 times or more']] },
     r_disappoint: { type: 'single', q: ['هل اخترت مكاناً بناءً على تقييمات الإنترنت ثم خاب ظنك؟', 'Have you chosen a place based on online ratings and been disappointed?'], opts: [
       ['often', 'كثيراً', 'Often'], ['sometimes', 'أحياناً', 'Sometimes'], ['rarely', 'نادراً', 'Rarely'], ['never', 'أبداً', 'Never']] },
+    r_satisfaction: { type: 'single', q: ['ما مدى رضاك عن الطرق التي تستخدمها حالياً للبحث عن الأماكن والخدمات؟', 'How satisfied are you with the ways you currently find places and services?'], opts: [
+      ['very_sat', 'راضٍ جداً', 'Very satisfied'], ['sat', 'راضٍ', 'Satisfied'], ['neutral', 'محايد', 'Neutral'],
+      ['unsat', 'غير راضٍ', 'Not satisfied'], ['very_unsat', 'غير راضٍ إطلاقاً', 'Not at all satisfied']] },
+    r_interest: { type: 'single', q: ['لو وُجدت وسيلة توصلك لخيارات تناسب احتياجك بشكل أسرع وأسهل، ما مدى اهتمامك بتجربتها؟', 'If there were a faster, easier way to reach options that fit your needs, how interested would you be in trying it?'], opts: [
+      ['very', 'مهتم جداً', 'Very interested'], ['somewhat', 'مهتم إلى حد ما', 'Somewhat interested'], ['unsure', 'غير متأكد', 'Not sure'], ['not', 'غير مهتم', 'Not interested']] },
+    r_features: { type: 'multi', max: 3, q: ['ما الذي يشجعك على تجربة وسيلة جديدة للبحث عن الأماكن والخدمات؟', 'What would encourage you to try a new way of finding places and services?'],
+      hint: ['اختر حتى 3', 'Choose up to three'], opts: [
+      ['accurate', 'معلومات دقيقة ومحدّثة (مواعيد، أسعار، عروض)', 'Accurate, up-to-date info (hours, prices, offers)'],
+      ['trusted', 'ترشيحات من أشخاص أثق بهم', 'Recommendations from people I trust'],
+      ['fit', 'نتائج تناسب احتياجي وميزانيتي', 'Results that fit my needs and budget'],
+      ['fast', 'توفير الوقت وسهولة الاستخدام', 'Saves time and is easy to use'],
+      ['one_place', 'كل شيء في مكان واحد', 'Everything in one place'],
+      ['deals', 'عروض وخصومات خاصة', 'Special offers and discounts'],
+      ['other', 'غير ذلك', 'Something else']] },
+    r_free: { type: 'single', q: ['ما مدى استعدادك لتجربة خدمة جديدة لو كانت مجانية في البداية؟', 'How willing would you be to try a new service if it were free at first?'], opts: [
+      ['definitely', 'سأجربها بالتأكيد', 'I’d definitely try it'], ['likely', 'غالباً سأجربها', 'I’d probably try it'], ['maybe', 'ربما', 'Maybe'], ['unlikely', 'غالباً لا', 'Probably not']] },
+    r_pay: { type: 'single', q: ['لو أثبتت الخدمة أنها مفيدة وتوفّر وقتك ومجهودك، هل تدفع مقابل مزايا إضافية؟', 'If the service proved useful and saved you time and effort, would you pay for extra features?'], opts: [
+      ['yes', 'نعم، إذا كانت المزايا تستحق', 'Yes, if the features are worth it'], ['maybe', 'ربما، حسب السعر', 'Maybe, depending on the price'],
+      ['free_only', 'أفضّل النسخة المجانية فقط', 'I’d stick to the free version'], ['no', 'لا', 'No']] },
 
     // Businesses
     b_type: { type: 'single', q: ['ما نوع نشاطك؟', 'What type of business do you run?'], opts: [
@@ -64,6 +83,27 @@
       ['1', 'فرع واحد', 'One'], ['2_3', '2–3', '2–3'], ['4_10', '4–10', '4–10'], ['10p', 'أكثر من 10', 'More than 10']] },
     b_age: { type: 'single', q: ['منذ متى تعملون {in}؟', 'How long have you operated {in}?'], opts: [
       ['lt1', 'أقل من سنة', 'Less than a year'], ['1_3', '1–3 سنوات', '1–3 years'], ['3_10', '3–10 سنوات', '3–10 years'], ['10p', 'أكثر من 10 سنوات', 'More than 10 years']] },
+    b_update: { type: 'single', q: ['كيف تُحدَّث معلومات نشاطك على الإنترنت، مثل الأسعار والخدمات والمواعيد والعروض؟', 'How is your business information online kept up to date, such as prices, services, hours and offers?'], opts: [
+      ['regular_self', 'نحدّثها بانتظام بأنفسنا', 'We update it regularly ourselves'],
+      ['agency', 'وكالة أو جهة خارجية تتولاها', 'An agency or outside person handles it'],
+      ['when_needed', 'فقط عند الحاجة أو عند ملاحظة خطأ', 'Only when needed or when we spot a mistake'],
+      ['rarely', 'نادراً أو لا تُحدَّث', 'Rarely or never'],
+      ['unknown', 'لا أعرف', 'I don’t know']] },
+    b_wrong_info: { type: 'single', q: ['هل واجهت مشكلات بسبب معلومات قديمة أو غير دقيقة عن نشاطك على الإنترنت؟', 'Have you had problems because of outdated or wrong information about your business online?'], opts: [
+      ['often', 'كثيراً', 'Often'], ['sometimes', 'أحياناً', 'Sometimes'], ['rarely', 'نادراً', 'Rarely'], ['never', 'أبداً', 'Never'], ['unknown', 'لا أعرف', 'I don’t know']] },
+    b_inquiries: { type: 'multi', max: 3, q: ['ما الاستفسارات التي تتكرر من العملاء وتأخذ وقت فريقك؟', 'Which customer questions come up again and again and take your team’s time?'],
+      hint: ['اختر حتى 3', 'Choose up to three'], opts: [
+      ['prices', 'الأسعار', 'Prices'],
+      ['hours', 'المواعيد وساعات العمل', 'Opening hours'],
+      ['location', 'الموقع وطريقة الوصول', 'Location and directions'],
+      ['availability', 'توفّر الخدمة أو المنتج أو المواعيد', 'Availability of a service, product or slot'],
+      ['booking', 'الحجز أو الطلب', 'Booking or ordering'],
+      ['offers', 'العروض والخصومات', 'Offers and discounts'],
+      ['services', 'تفاصيل الخدمات أو القائمة', 'Details of services or the menu'],
+      ['other', 'غير ذلك', 'Other']] },
+    b_inq_time: { type: 'single', q: ['كم من الوقت يقضيه فريقك يومياً في الرد على هذه الاستفسارات؟', 'How much time does your team spend each day answering these questions?'], opts: [
+      ['lt30', 'أقل من نصف ساعة', 'Under 30 minutes'], ['30_60', 'من نصف ساعة إلى ساعة', '30 minutes to an hour'],
+      ['1_3', 'من ساعة إلى 3 ساعات', '1 to 3 hours'], ['3p', 'أكثر من 3 ساعات', 'More than 3 hours'], ['unknown', 'لا أعرف', 'I don’t know']] },
     b_channels: { type: 'multi', max: 3, q: ['من أين يأتي معظم عملائكم الجدد؟', 'Where do most of your new customers come from?'],
       hint: ['اختر حتى 3', 'Choose up to three'], opts: [
       ['wom', 'ترشيحات من عملاء آخرين', 'Recommendations from other customers'],
@@ -84,6 +124,24 @@
       ['measure', 'لا نعرف أي قناة تجلب العملاء فعلاً', 'We can’t tell which channel really works'],
       ['retention', 'العملاء لا يعودون', 'Customers don’t come back'],
       ['none', 'لا توجد مشكلة حقيقية', 'No real problem']] },
+    b_tools: { type: 'single', q: ['هل تستخدم حالياً أدوات رقمية لتحليل أداء نشاطك أو لاتخاذ قرارات التسويق؟', 'Do you currently use any digital tools to analyse your business performance or make marketing decisions?'], opts: [
+      ['advanced', 'نعم، أدوات متخصصة (برامج تحليل أو إدارة عملاء)', 'Yes, specialised tools (analytics or customer-management software)'],
+      ['basic', 'نعم، أدوات بسيطة (إحصاءات إنستغرام أو Google)', 'Yes, basic tools (Instagram or Google insights)'],
+      ['no', 'لا', 'No']] },
+    b_tools_sat: { type: 'single', q: ['ما مدى رضاك عن الأدوات الرقمية التي تستخدمها حالياً في إدارة نشاطك وتسويقه؟', 'How satisfied are you with the digital tools you use now to run and market your business?'], opts: [
+      ['very_sat', 'راضٍ جداً', 'Very satisfied'], ['sat', 'راضٍ', 'Satisfied'], ['neutral', 'محايد', 'Neutral'],
+      ['unsat', 'غير راضٍ', 'Not satisfied'], ['very_unsat', 'غير راضٍ إطلاقاً', 'Not at all satisfied'], ['none', 'لا أستخدم أدوات رقمية', 'I don’t use digital tools']] },
+    b_goals: { type: 'multi', max: 3, q: ['ما الذي تريد تحسينه في نشاطك خلال الـ12 شهراً القادمة؟', 'What do you want to improve in your business over the next 12 months?'],
+      hint: ['اختر حتى 3', 'Choose up to three'], opts: [
+      ['new_customers', 'جذب عملاء جدد', 'Attracting new customers'],
+      ['retention', 'عودة العملاء وولاؤهم', 'Repeat customers and loyalty'],
+      ['reputation', 'السمعة والتقييمات', 'Reputation and reviews'],
+      ['visibility', 'الظهور على الإنترنت', 'Being visible online'],
+      ['marketing_cost', 'تقليل تكلفة التسويق', 'Lower marketing costs'],
+      ['time', 'توفير وقت الفريق', 'Saving the team’s time'],
+      ['data', 'فهم العملاء والأداء بالأرقام', 'Understanding customers and performance with data'],
+      ['sales', 'زيادة المبيعات', 'Higher sales'],
+      ['other', 'غير ذلك', 'Other']] },
     b_spend: { type: 'single', q: ['كم تنفقون شهرياً تقريباً على التسويق؟', 'Roughly how much do you spend on marketing each month?'],
       hint: ['إعلانات، مؤثرون، عمولات التطبيقات، وكالات', 'Ads, influencers, app commissions, agencies'], opts: [
       ['lt2k', '', ''], ['2_5k', '', ''], ['5_15k', '', ''], ['15kp', '', ''], // spend bands, labelled per country's currency
@@ -91,7 +149,17 @@
     b_priority: { type: 'scale', min: 1, max: 10, q: ['لو توفّرت أداة جديدة توفّر عليك الوقت والمجهود وتوصلك للعملاء مباشرة، ما مدى احتمال أن تستخدمها؟', 'If a new tool saved you time and effort and connected you directly with customers, how likely would you be to use it?'],
       hint: ['اختر رقماً من 1 إلى 10', 'Pick a number from 1 to 10'],
       ends: [['غير محتمل', 'Unlikely'], ['بالتأكيد', 'Definitely']] },
-    b_pay: { type: 'single', q: ['ولو استخدمت هذه الأداة، كيف تفضّل الدفع مقابلها؟', 'And if you used this tool, how would you prefer to pay for it?'], opts: [
+    b_success: { type: 'multi', max: 3, q: ['ما النتائج التي تجعلك تعتبر أداة رقمية جديدة مفيدة لنشاطك؟', 'What results would make you consider a new digital tool useful for your business?'],
+      hint: ['اختر حتى 3', 'Choose up to three'], opts: [
+      ['more_customers', 'عملاء جدد أكثر', 'More new customers'],
+      ['repeat', 'عملاء يعودون أكثر', 'More repeat customers'],
+      ['less_time', 'وقت أقل في الرد على الاستفسارات', 'Less time answering questions'],
+      ['accurate_info', 'معلومات محدّثة عن نشاطي في كل مكان', 'Up-to-date information about my business everywhere'],
+      ['better_reviews', 'تقييمات أفضل وأكثر مصداقية', 'Better, more credible reviews'],
+      ['insights', 'تقارير واضحة عن أداء نشاطي', 'Clear reports on how my business is doing'],
+      ['lower_cost', 'تكلفة تسويق أقل', 'Lower marketing costs'],
+      ['other', 'غير ذلك', 'Other']] },
+    b_pay: { type: 'single', q: ['لو حققت الأداة فائدة واضحة لنشاطك، كيف تفضّل الدفع مقابلها؟', 'If the tool brought clear benefits to your business, how would you prefer to pay for it?'], opts: [
       ['monthly', 'اشتراك شهري بسيط بدون عمولات', 'A simple monthly subscription, no commissions'],
       ['commission', 'عمولة على كل عملية', 'A commission on each transaction'],
       ['free_light', 'استخدام طفيف مجاني', 'Light use for free'],
@@ -165,8 +233,10 @@
   function validCountry(c) { return COUNTRY_CODES.indexOf(c) >= 0 ? c : null; }
 
   var FLOWS = {
-    resident: ['country', 'r_area', 'r_status', 'r_age', 'r_category', 'r_sources', 'r_trust', 'r_pain', 'r_recos', 'r_disappoint'],
-    business: ['country', 'b_type', 'b_role', 'b_branches', 'b_age', 'b_channels', 'b_wom', 'b_challenge', 'b_spend', 'b_priority', 'b_pay', 'b_pilot']
+    resident: ['country', 'r_area', 'r_status', 'r_age', 'r_category', 'r_sources', 'r_trust', 'r_pain', 'r_recos', 'r_disappoint',
+      'r_satisfaction', 'r_interest', 'r_features', 'r_free', 'r_pay'],
+    business: ['country', 'b_type', 'b_role', 'b_branches', 'b_age', 'b_update', 'b_wrong_info', 'b_inquiries', 'b_inq_time',
+      'b_channels', 'b_wom', 'b_challenge', 'b_spend', 'b_tools', 'b_tools_sat', 'b_goals', 'b_priority', 'b_success', 'b_pay', 'b_pilot']
   };
 
   // Extra labels for fields that are not questions
@@ -194,15 +264,15 @@
   // ---------- UI strings ----------
   var T = {
     lang_switch: ['English', 'العربية'],
-    start_title: ['ساعدنا نفهم كيف تجد الأماكن والخدمات {in}', 'Help us understand how people find places and services {in}'],
-    start_lead: ['دراسة قصيرة من فريق بحث مستقل. دقيقتان فقط، وإجاباتك سرية وتُستخدم للبحث فقط.', 'A short study by an independent research team. It takes two minutes, and your answers are confidential and used for research only.'],
+    start_title: ['ساعدنا نفهم', 'Help us understand'],
+    start_lead: ['دراسة قصيرة من فريق بحث مستقل. دقائق فقط، وإجاباتك تُستخدم للبحث فقط.', 'A short study by an independent research team. It takes just a few minutes, and your answers are used for research only.'],
     start_q: ['أنت هنا بصفتك…', 'You are here as…'],
     start_res: ['مقيم', 'A resident'],
     start_res_d: ['كيف تجد وتختار المطاعم والعيادات والخدمات وغيرها؟', 'How do you find and choose restaurants, clinics, services and more?'],
     start_biz: ['صاحب نشاط تجاري', 'A business owner'],
-    start_biz_d: ['مطعم، عيادة، صالون أو أي نشاط خدمي', 'Restaurant, clinic, salon or any service business'],
-    minutes_res: ['دقيقتان تقريباً', 'About 2 minutes'],
-    minutes_biz: ['3 دقائق تقريباً', 'About 3 minutes'],
+    start_biz_d: ['صعوبات إدارة نشاطك، والوصول إلى العملاء، والاستفادة من الأدوات الرقمية', 'The challenges of running your business, reaching customers and using digital tools'],
+    minutes_res: ['3 دقائق تقريباً', 'About 3 minutes'],
+    minutes_biz: ['5 دقائق تقريباً', 'About 5 minutes'],
     back: ['رجوع', 'Back'],
     next: ['التالي', 'Next'],
     step_of: ['سؤال {i} من {n}', 'Question {i} of {n}'],
@@ -239,8 +309,11 @@
     c_business: ['اسم النشاط التجاري', 'Business name'],
     c_cr: ['رقم السجل التجاري (اختياري)', 'Commercial registration number (optional)'],
     c_area: ['المنطقة', 'Area'],
-    c_email: ['البريد الإلكتروني للعمل', 'Work email'],
-    c_phone: ['رقم الجوال (اختياري)', 'Mobile number (optional)'],
+    c_email: ['البريد الإلكتروني', 'Email'],
+    c_contact_hint: ['اكتب البريد الإلكتروني أو رقم الجوال، واحد منهما على الأقل.', 'Enter your email or mobile number, at least one of them.'],
+    need_contact: ['اكتب البريد الإلكتروني أو رقم الجوال', 'Enter your email or mobile number'],
+    bad_phone: ['اكتب رقم جوال صحيحاً', 'Enter a valid mobile number'],
+    c_phone: ['رقم الجوال', 'Mobile number'],
     c_note: ['بياناتك تُستخدم لأغراض هذه الدراسة فقط.', 'Your details are used for this study only.'],
     c_terms_head: ['البنود', 'Terms'],
     c_agree: ['قرأت البنود أعلاه وأوافق عليها', 'I have read and agree to the terms above'],
@@ -364,9 +437,18 @@
   function isDemo() { return !cfg().SCRIPT_URL; }
 
   function post(body) {
-    return fetch(cfg().SCRIPT_URL, { method: 'POST', body: JSON.stringify(body) }) // text/plain: no CORS preflight
+    // text/plain: no CORS preflight. keepalive: the save still goes through if the page is closed right after.
+    return fetch(cfg().SCRIPT_URL, { method: 'POST', body: JSON.stringify(body), keepalive: true })
       .then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
       .then(function (j) { if (!j.ok) throw new Error(j.error || 'failed'); return j; });
+  }
+
+  // Last-chance save when the page is being closed or put in the background
+  function beacon(kind, data) {
+    if (isDemo()) { submit(kind, data); return; }
+    var body = JSON.stringify({ action: 'submit', kind: kind, data: data });
+    try { if (navigator.sendBeacon && navigator.sendBeacon(cfg().SCRIPT_URL, new Blob([body], { type: 'text/plain' }))) return; } catch (e) {}
+    try { fetch(cfg().SCRIPT_URL, { method: 'POST', body: body, keepalive: true }); } catch (e) {}
   }
 
   function submit(kind, data) {
@@ -425,7 +507,12 @@
         r_trust: area === 'outside' ? '' : pick({ friends: 9, groups: 3, maps: 5, social: 2, search: 1, apps: 1, ai: 0.3 }),
         r_pain: area === 'outside' ? '' : multi({ reviews: 0.46, outdated: 0.41, too_many: 0.27, scattered: 0.22, no_match: 0.2, wait: 0.14 }, 2),
         r_recos: area === 'outside' ? '' : pick({ '0': 1, '1_2': 4, '3_5': 5, '6p': 2 }),
-        r_disappoint: area === 'outside' ? '' : pick({ often: 3, sometimes: 7, rarely: 3, never: 1 })
+        r_disappoint: area === 'outside' ? '' : pick({ often: 3, sometimes: 7, rarely: 3, never: 1 }),
+        r_satisfaction: area === 'outside' ? '' : pick({ very_sat: 1, sat: 4, neutral: 5, unsat: 4, very_unsat: 1.5 }),
+        r_interest: area === 'outside' ? '' : pick({ very: 6, somewhat: 5, unsure: 2, not: 1 }),
+        r_features: area === 'outside' ? '' : multi({ accurate: 0.55, trusted: 0.5, fit: 0.45, fast: 0.4, one_place: 0.3, deals: 0.35, other: 0.03 }, 3),
+        r_free: area === 'outside' ? '' : pick({ definitely: 6, likely: 5, maybe: 2, unlikely: 0.7 }),
+        r_pay: area === 'outside' ? '' : pick({ yes: 3, maybe: 6, free_only: 4, no: 1.5 })
       }));
       if (area !== 'outside' && rnd() < 0.7) W.push(Object.assign(meta(i, nR, 'resident', rc), { ts: R[R.length - 1].ts, survey_id: m.id, w_type: 'resident', w_name: 'Demo ' + (i + 1), w_email: 'demo' + (i + 1) + '@example.com', w_whatsapp: '', w_area: area, dup: '' }));
     }
@@ -441,7 +528,15 @@
         b_age: pick({ lt1: 1, '1_3': 4, '3_10': 5, '10p': 2 }), b_channels: multi({ wom: 0.72, maps: 0.55, social: 0.5, apps: 0.3, influencers: 0.22, ads: 0.2, walkin: 0.15 }, 3),
         b_wom: pick({ lt20: 2, '20_40': 4, '40_60': 5, '60p': 3, unknown: 1 }), b_challenge: pick({ visibility: 5, cost: 6, reviews: 3, outdated: 2, measure: 3, retention: 2, none: 0.5 }),
         b_spend: pick({ lt2k: 3, '2_5k': 5, '5_15k': 4, '15kp': 1, unknown: 2 }), b_priority: String(Math.min(10, Math.max(3, Math.round(7 + (rnd() - 0.45) * 5)))),
-        b_pay: pick({ monthly: 5, commission: 4, free_light: 3, depends: 3 }), b_pilot: pilot
+        b_pay: pick({ monthly: 5, commission: 4, free_light: 3, depends: 3 }), b_pilot: pilot,
+        b_update: pick({ regular_self: 4, agency: 2, when_needed: 6, rarely: 2, unknown: 0.5 }),
+        b_wrong_info: pick({ often: 2, sometimes: 6, rarely: 4, never: 2, unknown: 1 }),
+        b_inquiries: multi({ prices: 0.7, hours: 0.5, availability: 0.45, location: 0.35, booking: 0.35, offers: 0.3, services: 0.3 }, 3),
+        b_inq_time: pick({ lt30: 2, '30_60': 4, '1_3': 5, '3p': 2, unknown: 1 }),
+        b_tools: pick({ advanced: 2, basic: 6, no: 4 }),
+        b_tools_sat: pick({ very_sat: 0.5, sat: 3, neutral: 4, unsat: 3, very_unsat: 1, none: 2 }),
+        b_goals: multi({ new_customers: 0.7, retention: 0.45, reputation: 0.35, visibility: 0.4, marketing_cost: 0.35, time: 0.25, data: 0.2, sales: 0.4 }, 3),
+        b_success: multi({ more_customers: 0.7, repeat: 0.45, less_time: 0.35, accurate_info: 0.3, better_reviews: 0.3, insights: 0.3, lower_cost: 0.35 }, 3)
       }));
       if (pilot !== 'no' && rnd() < 0.7) C.push(Object.assign(meta(i, nB, 'business', bc), {
         ts: bm.ts, survey_id: bm.id, b_type: type, c_name: 'Demo Owner ' + (i + 1), c_title: 'Owner', c_business: bizNames[i % 5] + ' ' + (i + 1),
@@ -490,7 +585,7 @@
   window.Adam = {
     Q: Q, FLOWS: FLOWS, EXTRA: EXTRA, T: T, TERMS: TERMS, TERMS_VERSION: TERMS_VERSION,
     t: t, label: label, question: question, codes: codes, langIndex: langIndex,
-    params: params, detectSource: detectSource, uid: uid, store: store, cfg: cfg, isDemo: isDemo,
+    params: params, detectSource: detectSource, beacon: beacon, uid: uid, store: store, cfg: cfg, isDemo: isDemo,
     COUNTRIES: COUNTRIES, COUNTRY_CODES: COUNTRY_CODES, setCountry: setCountry, country: country, countryInfo: countryInfo,
     countryPhrase: countryPhrase, validCountry: validCountry, targets: targets,
     submit: submit, stats: stats, admin: admin, demoRows: demoRows,

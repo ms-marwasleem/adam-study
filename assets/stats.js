@@ -10,9 +10,11 @@ var AdamStats = (function () {
   var META = ['id', 'ts', 'country', 'lang', 'src', 'med', 'camp', 'ref', 'entry', 'device', 'dur', 'flag'];
 
   var COLUMNS = {
-    Residents: META.concat(['status', 'last_q', 'step', 'r_area', 'r_status', 'r_age', 'r_category', 'r_sources', 'r_trust', 'r_pain', 'r_recos', 'r_disappoint']),
+    Residents: META.concat(['status', 'last_q', 'step', 'r_area', 'r_status', 'r_age', 'r_category', 'r_sources', 'r_trust', 'r_pain', 'r_recos', 'r_disappoint',
+      'r_satisfaction', 'r_interest', 'r_features', 'r_free', 'r_pay']),
     Waitlist: META.concat(['survey_id', 'w_type', 'w_name', 'w_email', 'w_whatsapp', 'w_area', 'dup']),
-    Businesses: META.concat(['status', 'last_q', 'step', 'b_type', 'b_role', 'b_branches', 'b_age', 'b_channels', 'b_wom', 'b_challenge', 'b_spend', 'b_priority', 'b_pay', 'b_pilot']),
+    Businesses: META.concat(['status', 'last_q', 'step', 'b_type', 'b_role', 'b_branches', 'b_age', 'b_channels', 'b_wom', 'b_challenge', 'b_spend', 'b_priority', 'b_pay', 'b_pilot',
+      'b_update', 'b_wrong_info', 'b_inquiries', 'b_inq_time', 'b_tools', 'b_tools_sat', 'b_goals', 'b_success']),
     Commitments: META.concat(['survey_id', 'b_type', 'c_name', 'c_title', 'c_business', 'c_cr', 'c_area', 'c_email', 'c_phone',
       'c_agree_terms', 'c_agree_name', 'c_call', 'c_signature', 'terms_version', 'email_sent', 'dup'])
   };
@@ -73,6 +75,8 @@ var AdamStats = (function () {
     return false;
   }
 
+  function answered(rows, key) { return rows.filter(function (r) { return r[key] !== '' && r[key] !== null && r[key] !== undefined; }); }
+
   function countryOf(r) { return r.country || 'qa'; } // rows saved before countries were added are Qatar
 
   // opts.country: only that country's rows; leave it out for all countries together
@@ -89,7 +93,10 @@ var AdamStats = (function () {
     // Waitlist = residents who want to use the app at launch (business owners are counted in the pilot instead)
     var wl = uniqueBy(clean(all.Waitlist).filter(function (r) { return r.w_type !== 'business'; }), 'w_email');
     var biz = clean(all.Businesses);
-    var com = uniqueBy(clean(all.Commitments), 'c_email');
+    var com = uniqueBy(clean(all.Commitments).map(function (r) {
+      // one sign-up per email, or per mobile number when no email was given
+      return Object.assign({}, r, { _contact: r.c_email || String(r.c_phone || '').replace(/\D/g, '') });
+    }), '_contact');
 
     // Daily timeline (Qatar time)
     var days = {};
@@ -138,7 +145,12 @@ var AdamStats = (function () {
         trust: tally(res, 'r_trust'),
         pain: tally(res, 'r_pain', true),
         recos: tally(res, 'r_recos'),
-        disappoint: tally(res, 'r_disappoint')
+        disappoint: tally(res, 'r_disappoint'),
+        satisfaction: tally(res, 'r_satisfaction'),
+        interest: tally(res, 'r_interest'),
+        features: tally(res, 'r_features', true),
+        free: tally(res, 'r_free'),
+        pay: tally(res, 'r_pay')
       },
       biz: {
         n: biz.length,
@@ -153,7 +165,15 @@ var AdamStats = (function () {
         priority: priority,
         priority_avg: pn ? Math.round((psum / pn) * 10) / 10 : null,
         pay: tally(biz, 'b_pay'),
-        pilot: tally(biz, 'b_pilot')
+        pilot: tally(biz, 'b_pilot'),
+        update: tally(biz, 'b_update'),
+        wrong_info: tally(biz, 'b_wrong_info'),
+        inquiries: tally(biz, 'b_inquiries', true),
+        inq_time: tally(biz, 'b_inq_time'),
+        tools: tally(biz, 'b_tools'),
+        tools_sat: tally(biz, 'b_tools_sat'),
+        goals: tally(biz, 'b_goals', true),
+        success: tally(biz, 'b_success', true)
       },
       com: { n: com.length, type: tally(com, 'b_type') },
       findings: {
@@ -166,7 +186,14 @@ var AdamStats = (function () {
         biz_wom40: share(biz, function (r) { return r.b_wom === '40_60' || r.b_wom === '60p'; }),
         biz_pilot: share(biz, function (r) { return r.b_pilot === 'yes' || r.b_pilot === 'maybe'; }),
         biz_pays: share(biz, function (r) { return r.b_pay === 'monthly' || r.b_pay === 'commission'; }),
-        biz_pays_depends: share(biz, function (r) { return r.b_pay === 'depends'; })
+        biz_pays_depends: share(biz, function (r) { return r.b_pay === 'depends'; }),
+        res_unsat: share(answered(res, 'r_satisfaction'), function (r) { return r.r_satisfaction === 'unsat' || r.r_satisfaction === 'very_unsat'; }),
+        res_interest: share(answered(res, 'r_interest'), function (r) { return r.r_interest === 'very' || r.r_interest === 'somewhat'; }),
+        res_free: share(answered(res, 'r_free'), function (r) { return r.r_free === 'definitely' || r.r_free === 'likely'; }),
+        res_pay: share(answered(res, 'r_pay'), function (r) { return r.r_pay === 'yes' || r.r_pay === 'maybe'; }),
+        biz_wrong_info: share(answered(biz, 'b_wrong_info'), function (r) { return r.b_wrong_info === 'often' || r.b_wrong_info === 'sometimes'; }),
+        biz_inq_1h: share(answered(biz, 'b_inq_time'), function (r) { return r.b_inq_time === '1_3' || r.b_inq_time === '3p'; }),
+        biz_no_tools: share(answered(biz, 'b_tools'), function (r) { return r.b_tools !== 'advanced'; })
       }
     };
   }

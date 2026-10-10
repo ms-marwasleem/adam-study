@@ -24,6 +24,12 @@
     f_biz_wom40: ['من أصحاب الأعمال يحصلون على 40% أو أكثر من عملائهم الجدد عبر الترشيحات', 'of businesses get 40% or more of new customers through recommendations'],
     f_biz_priority7: ['من أصحاب الأعمال سيستخدمون أداة جديدة توصلهم للعملاء (7 من 10 أو أكثر)', 'of businesses would likely use a new tool that connects them with customers (7/10 or higher)'],
     f_biz_pays: ['من أصحاب الأعمال مستعدون للدفع باشتراك شهري أو بعمولة', 'of businesses would pay by monthly subscription or commission'],
+    f_res_interest: ['مهتمون بتجربة وسيلة أسرع وأسهل للوصول إلى خيارات تناسبهم', 'are interested in trying a faster, easier way to find options that fit them'],
+    f_res_free: ['سيجربون خدمة جديدة إذا كانت مجانية في البداية', 'would try a new service if it were free at first'],
+    f_res_pay: ['مستعدون، أو ربما مستعدون، للدفع مقابل مزايا إضافية إذا أثبتت الخدمة فائدتها', 'would or might pay for extra features once the service proves useful'],
+    f_biz_wrong_info: ['من أصحاب الأعمال واجهوا مشكلات بسبب معلومات قديمة أو غير دقيقة عن نشاطهم على الإنترنت', 'of businesses have had problems from outdated or wrong information about them online'],
+    f_biz_inq_1h: ['من أصحاب الأعمال يقضي فريقهم ساعة أو أكثر يومياً في الرد على استفسارات متكررة', 'of businesses spend an hour or more a day answering repeat customer questions'],
+    f_biz_no_tools: ['من أصحاب الأعمال لا يستخدمون أدوات متخصصة لتحليل الأداء أو قرارات التسويق', 'of businesses don’t use specialised tools to analyse performance or guide marketing'],
     n_of: ['{k} من {n}', '{k} of {n}'],
     pays_depends: [' · و{d} ({p}) آخرين سيدفعون حسب أداء الأداة', ' · plus {d} ({p}) who would pay depending on how well it works'],
     collecting: ['جارٍ جمع الردود (يُعرض عند {m} رداً)', 'Collecting responses (shown at {m})'],
@@ -49,19 +55,33 @@
     priority_avg: ['المتوسط {v} من 10', 'Average {v} out of 10'],
     spend: ['الإنفاق الشهري على التسويق', 'Monthly marketing spend'],
     pay: ['طريقة الدفع المفضّلة', 'Preferred way to pay'],
+    satisfaction: ['الرضا عن طرق البحث الحالية', 'Satisfaction with current ways of searching'],
+    interest: ['الاهتمام بتجربة وسيلة أسرع وأسهل', 'Interest in trying a faster, easier way'],
+    features: ['ما يشجعهم على تجربة وسيلة جديدة', 'What would get them to try something new'],
+    free: ['تجربة خدمة جديدة إذا كانت مجانية في البداية', 'Trying a new service if it were free at first'],
+    rpay: ['الدفع مقابل مزايا إضافية', 'Paying for extra features'],
+    update: ['كيف تُحدَّث معلومات النشاط على الإنترنت', 'How their online information is kept up to date'],
+    wrong_info: ['مشكلات بسبب معلومات قديمة أو خاطئة', 'Problems from outdated or wrong information'],
+    inquiries: ['الاستفسارات المتكررة من العملاء', 'Repeat customer questions'],
+    inq_time: ['الوقت اليومي للرد على الاستفسارات', 'Time spent each day on these questions'],
+    tools: ['استخدام أدوات رقمية للتحليل والتسويق', 'Use of digital tools for analysis and marketing'],
+    tools_sat: ['الرضا عن الأدوات الرقمية الحالية', 'Satisfaction with current digital tools'],
+    goals: ['ما يريدون تحسينه خلال 12 شهراً', 'What they want to improve in the next 12 months'],
+    success: ['ما يجعل الأداة الجديدة مفيدة في نظرهم', 'What would make a new tool worth it'],
+    up3: ['حتى 3 لكل مشارك', 'Up to three per respondent'],
     btype: ['نوع النشاط', 'Business type'],
     com_type: ['تسجيلات التجربة حسب نوع النشاط', 'Pilot sign-ups by business type'],
     method: ['المنهجية', 'Method'],
     method_items: [[
       'الدراسة أونلاين بالكامل، بالعربية والإنجليزية، وتُنشر عبر قنوات تواصل {inR}.',
-      'يُستبعد من لا يقيم {inR}، والردود السريعة بشكل غير طبيعي، والتسجيلات المكررة بنفس البريد.',
+      'يُستبعد من لا يقيم {inR}، والردود السريعة بشكل غير طبيعي، والتسجيلات المكررة.',
       'هذه الصفحة لا تعرض أي بيانات شخصية، فقط أرقاماً مجمّعة.',
-      'تسجيلات التجربة يقدّمها أصحاب الأعمال باسم النشاط وبريد العمل بعد إكمال الاستبيان.'
+      'تسجيلات التجربة يقدّمها أصحاب الأعمال باسم النشاط وبريد إلكتروني أو رقم جوال بعد إكمال الاستبيان.'
     ], [
       'Fully online, in Arabic and English, distributed through channels {inR}.',
-      'Excludes people not living {inR}, unusually fast responses and repeat sign-ups with the same email.',
+      'Excludes people not living {inR}, unusually fast responses and repeat sign-ups.',
       'This page shows aggregate numbers only, never personal details.',
-      'Pilot sign-ups are submitted by business owners with their business name and work email after completing the survey.'
+      'Pilot sign-ups are submitted by business owners with their business name and an email or mobile number after completing the survey.'
     ]],
     period: ['فترة الجمع: {a} – {b}', 'Collection period: {a} – {b}'],
     demo: ['بيانات تجريبية للعرض فقط. ستظهر الأرقام الحقيقية بعد ربط الصفحة بالشيت.', 'Sample data for preview only. Real numbers appear once the page is connected.'],
@@ -164,7 +184,9 @@
       var F = data.findings;
       var list = [
         ['people_trust', F.people_trust], ['reco3', F.reco3], ['disappoint', F.disappoint],
-        ['biz_wom40', F.biz_wom40], ['biz_priority7', F.biz_priority7], ['biz_pays', F.biz_pays]
+        ['res_interest', F.res_interest], ['res_free', F.res_free], ['res_pay', F.res_pay],
+        ['biz_wom40', F.biz_wom40], ['biz_wrong_info', F.biz_wrong_info], ['biz_inq_1h', F.biz_inq_1h],
+        ['biz_priority7', F.biz_priority7], ['biz_no_tools', F.biz_no_tools], ['biz_pays', F.biz_pays]
       ];
       main.appendChild(el('div', { class: 'section-head' }, [el('h2', { text: L('findings') })]));
       main.appendChild(el('div', { class: 'grid g3' }, list.map(function (it) {
@@ -193,6 +215,11 @@
         panel(L('pain'), L('pain_sub'), C.bars(r.pain, rn, bo('r_pain'))),
         panel(L('recos'), null, C.bars(r.recos, rn, bo('r_recos', { order: 'schema', highlight: ['3_5', '6p'] }))),
         panel(L('category'), L('category_sub'), C.bars(r.category, rn, bo('r_category'))),
+        panel(L('satisfaction'), null, C.bars(r.satisfaction, rn, bo('r_satisfaction', { order: 'schema', highlight: ['unsat', 'very_unsat'] }))),
+        panel(L('interest'), null, C.bars(r.interest, rn, bo('r_interest', { order: 'schema', highlight: ['very', 'somewhat'] }))),
+        panel(L('features'), L('up3'), C.bars(r.features, rn, bo('r_features'))),
+        panel(L('free'), null, C.bars(r.free, rn, bo('r_free', { order: 'schema', highlight: ['definitely', 'likely'] }))),
+        panel(L('rpay'), null, C.bars(r.pay, rn, bo('r_pay', { order: 'schema', highlight: ['yes', 'maybe'] }))),
         panel(L('profile'), null, el('div', null, [
           C.bars(r.status, rn, bo('r_status', { order: 'schema' })),
           C.bars(r.age, rn, bo('r_age', { order: 'schema' }))
@@ -208,6 +235,14 @@
         panel(L('channels'), L('channels_sub'), C.bars(b.channels, bn, bo('b_channels', { highlight: ['wom'] }))),
         panel(L('wom'), null, C.bars(b.wom, bn, bo('b_wom', { order: 'schema', highlight: ['40_60', '60p'] }))),
         panel(L('challenge'), null, C.bars(b.challenge, bn, bo('b_challenge'))),
+        panel(L('update'), null, C.bars(b.update, bn, bo('b_update', { order: 'schema' }))),
+        panel(L('wrong_info'), null, C.bars(b.wrong_info, bn, bo('b_wrong_info', { order: 'schema', highlight: ['often', 'sometimes'] }))),
+        panel(L('inquiries'), L('up3'), C.bars(b.inquiries, bn, bo('b_inquiries'))),
+        panel(L('inq_time'), null, C.bars(b.inq_time, bn, bo('b_inq_time', { order: 'schema', highlight: ['1_3', '3p'] }))),
+        panel(L('tools'), null, C.bars(b.tools, bn, bo('b_tools', { order: 'schema' }))),
+        panel(L('tools_sat'), null, C.bars(b.tools_sat, bn, bo('b_tools_sat', { order: 'schema' }))),
+        panel(L('goals'), L('up3'), C.bars(b.goals, bn, bo('b_goals'))),
+        panel(L('success'), L('up3'), C.bars(b.success, bn, bo('b_success'))),
         panel(L('priority'), null, prio),
         panel(L('pay'), null, C.bars(b.pay, bn, bo('b_pay', { highlight: ['monthly', 'commission'] }))),
         panel(L('spend'), null, C.bars(b.spend, bn, bo('b_spend', { order: 'schema' }))),
