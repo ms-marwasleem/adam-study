@@ -135,5 +135,14 @@
     ]);
   }
 
-  window.AdamCharts = { bars: bars, columns: columns, cumulative: cumulative, meter: meter, tip: tip };
+  /* A plain count card: label, big number, optional note. No targets. */
+  function stat(labelText, value, foot) {
+    return el('div', { class: 'panel meter' }, [
+      el('div', { class: 'label', text: labelText }),
+      el('div', { class: 'num', text: String(value) }),
+      foot ? el('div', { class: 'foot', text: foot }) : null
+    ]);
+  }
+
+  window.AdamCharts = { bars: bars, columns: columns, cumulative: cumulative, meter: meter, stat: stat, tip: tip };
 })();

@@ -13,7 +13,7 @@ window.ADAM_CONFIG = {
   // Country used when a link has no ?c=  (qa, ae, sa, eg, other)
   DEFAULT_COUNTRY: "qa",
 
-  // Targets per country, shown as progress on both dashboards
+  // Targets per country (kept for reference only, not shown on any page)
   TARGETS: {
     qa:    { residents: 200, waitlist: 300, businesses: 20, commitments: 10 },
     ae:    { residents: 200, waitlist: 300, businesses: 20, commitments: 10 },

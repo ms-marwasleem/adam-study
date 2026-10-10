@@ -7,16 +7,15 @@
     lang_switch: ['English', 'العربية'],
     eyebrow: ['تحقّق ميداني مباشر · {name}', 'Live market validation · {name}'],
     title: ['كيف يجد الناس {inR} الأماكن والخدمات المحلية', 'How people {inR} find local places and services'],
-    lead: ['نتائج دراسة أونلاين مستمرة مع المقيمين وأصحاب الأعمال {inR}. الأرقام تتحدّث تلقائياً كل يوم.', 'Results from an ongoing online study with residents and business owners {inR}. The numbers update automatically every day.'],
-    updated: ['آخر تحديث {t} · تتحدّث النتائج يومياً', 'Updated {t} · results update daily'],
-    progress: ['التقدّم نحو الأهداف', 'Progress to targets'],
+    lead: ['نتائج دراسة أونلاين مستمرة مع المقيمين وأصحاب الأعمال {inR}. الأرقام تتحدّث تلقائياً.', 'Results from an ongoing online study with residents and business owners {inR}. The numbers update automatically.'],
+    updated: ['آخر تحديث {t} · نتائج مباشرة', 'Updated {t} · live results'],
+    progress: ['الردود حتى الآن', 'Responses so far'],
     m_res: ['مقيمون أكملوا الاستبيان', 'Residents surveyed'],
     m_wl: ['مقيمون في قائمة الانتظار', 'Residents on the waitlist'],
-    m_wl_foot: ['{p}% من الهدف · مقيمون سجّلوا ليستخدموا التطبيق عند إطلاقه', '{p}% of target · residents who signed up to use the app at launch'],
+    m_wl_foot: ['مقيمون سجّلوا ليستخدموا التطبيق عند إطلاقه', 'Residents who signed up to use the app at launch'],
     m_biz: ['أصحاب أعمال أكملوا الاستبيان', 'Businesses surveyed'],
     m_com: ['أصحاب أعمال في التجربة المجانية', 'Businesses in the free pilot'],
-    m_com_foot: ['{p}% من الهدف · أصحاب أعمال سجّلوا ليجرّبوا التطبيق مجاناً قبل إطلاقه', '{p}% of target · business owners who signed up to try the app free before launch'],
-    of_target: ['{p}% من الهدف', '{p}% of target'],
+    m_com_foot: ['أصحاب أعمال سجّلوا ليجرّبوا التطبيق مجاناً قبل إطلاقه', 'Business owners who signed up to try the app free before launch'],
     findings: ['أهم النتائج', 'Key findings'],
     f_people_trust: ['يثقون بترشيحات من يعرفونهم أكثر من أي مصدر آخر عند القرار النهائي', 'trust people they know more than any other source for the final decision'],
     f_reco3: ['اختاروا مكاناً 3 مرات أو أكثر خلال 3 أشهر بسبب ترشيح من شخص يعرفونه', 'chose a place 3+ times in 3 months because someone they know recommended it'],
@@ -78,7 +77,6 @@
     var country = A.validCountry(opts.country || P.c) || A.cfg().DEFAULT_COUNTRY || 'qa';
     A.setCountry(country);
     var CI = A.countryInfo(country);
-    var TG = A.targets(country);
 
     function fillCountry(s) {
       var i = A.langIndex(lang);
@@ -134,12 +132,11 @@
       var c = data.counts, li = A.langIndex(lang);
       // Progress
       main.appendChild(el('div', { class: 'section-head' }, [el('h2', { text: L('progress') })]));
-      function pct(v, t) { return t ? Math.round((v / t) * 100) : 0; }
       main.appendChild(el('div', { class: 'grid g4' }, [
-        C.meter(L('m_res'), c.residents, TG.residents, L('of_target', { p: pct(c.residents, TG.residents) })),
-        C.meter(L('m_wl'), c.waitlist, TG.waitlist, L('m_wl_foot', { p: pct(c.waitlist, TG.waitlist) })),
-        C.meter(L('m_biz'), c.businesses, TG.businesses, L('of_target', { p: pct(c.businesses, TG.businesses) })),
-        C.meter(L('m_com'), c.commitments, TG.commitments, L('m_com_foot', { p: pct(c.commitments, TG.commitments) }))
+        C.stat(L('m_res'), c.residents),
+        C.stat(L('m_wl'), c.waitlist, L('m_wl_foot')),
+        C.stat(L('m_biz'), c.businesses),
+        C.stat(L('m_com'), c.commitments, L('m_com_foot'))
       ]));
 
       // Findings
@@ -207,7 +204,7 @@
 
     render();
     load();
-    var timer = setInterval(load, 60 * 60 * 1000); // picks up the new daily snapshot if the page stays open
+    var timer = setInterval(load, 2 * 60 * 1000); // refresh every 2 minutes while the page stays open
     return { stop: function () { clearInterval(timer); } };
   }
 

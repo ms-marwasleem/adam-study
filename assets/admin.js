@@ -171,12 +171,10 @@
     }
 
     function vOverview(main, D, S) {
-      var TG = F.country ? A.targets(F.country) : A.COUNTRY_CODES.reduce(function (t, cc) {
-        var x = A.targets(cc); ['residents', 'waitlist', 'businesses', 'commitments'].forEach(function (k) { t[k] = (t[k] || 0) + (x[k] || 0); }); return t;
-      }, {}), c = S.counts;
+      var c = S.counts;
       main.appendChild(el('div', { class: 'grid g4' }, [
-        C.meter(L('m_res'), c.residents, TG.residents), C.meter(L('m_wl'), c.waitlist, TG.waitlist),
-        C.meter(L('m_biz'), c.businesses, TG.businesses), C.meter(L('m_com'), c.commitments, TG.commitments)
+        C.stat(L('m_res'), c.residents), C.stat(L('m_wl'), c.waitlist),
+        C.stat(L('m_biz'), c.businesses), C.stat(L('m_com'), c.commitments)
       ]));
       var flagged = [].concat(D.Residents, D.Waitlist, D.Businesses, D.Commitments).filter(function (r) { return r.flag; }).length;
       main.appendChild(el('p', { class: 'note', text: L('excluded', { p: c.partial_residents + c.partial_businesses, o: c.screened_out, f: flagged }) }));
