@@ -103,16 +103,16 @@
   // ---------- Countries ----------
   // in: phrase used inside sentences; inR: same on the results page; bands: monthly marketing spend thresholds
   var COUNTRIES = {
-    qa: { name: ['قطر', 'Qatar'], in: ['في قطر', 'in Qatar'], citizen: ['مواطن قطري', 'Qatari citizen'], cur: ['ر.ق', 'QAR'], bands: [2000, 5000, 15000], tz: 'Asia/Qatar',
+    qa: { name: ['قطر', 'Qatar'], in: ['في قطر', 'in Qatar'], citizen: ['مواطن قطري', 'Qatari citizen'], dial: '+974', cur: ['ر.ق', 'QAR'], bands: [2000, 5000, 15000], tz: 'Asia/Qatar',
       areas: [['doha', 'الدوحة', 'Doha'], ['pearl_westbay', 'اللؤلؤة أو الخليج الغربي', 'The Pearl or West Bay'], ['lusail', 'لوسيل', 'Lusail'],
         ['rayyan', 'الريان', 'Al Rayyan'], ['wakrah', 'الوكرة', 'Al Wakrah'], ['other_qa', 'منطقة أخرى في قطر', 'Elsewhere in Qatar']] },
-    ae: { name: ['الإمارات', 'UAE'], in: ['في الإمارات', 'in the UAE'], citizen: ['مواطن إماراتي', 'Emirati citizen'], cur: ['د.إ', 'AED'], bands: [2000, 5000, 15000], tz: 'Asia/Dubai',
+    ae: { name: ['الإمارات', 'UAE'], in: ['في الإمارات', 'in the UAE'], citizen: ['مواطن إماراتي', 'Emirati citizen'], dial: '+971', cur: ['د.إ', 'AED'], bands: [2000, 5000, 15000], tz: 'Asia/Dubai',
       areas: [['dubai', 'دبي', 'Dubai'], ['abu_dhabi', 'أبوظبي', 'Abu Dhabi'], ['sharjah', 'الشارقة', 'Sharjah'], ['ajman', 'عجمان', 'Ajman'],
         ['al_ain', 'العين', 'Al Ain'], ['other_ae', 'إمارة أخرى', 'Another emirate']] },
-    sa: { name: ['السعودية', 'Saudi Arabia'], in: ['في السعودية', 'in Saudi Arabia'], citizen: ['مواطن سعودي', 'Saudi citizen'], cur: ['ر.س', 'SAR'], bands: [2000, 5000, 15000], tz: 'Asia/Riyadh',
+    sa: { name: ['السعودية', 'Saudi Arabia'], in: ['في السعودية', 'in Saudi Arabia'], citizen: ['مواطن سعودي', 'Saudi citizen'], dial: '+966', cur: ['ر.س', 'SAR'], bands: [2000, 5000, 15000], tz: 'Asia/Riyadh',
       areas: [['riyadh', 'الرياض', 'Riyadh'], ['jeddah', 'جدة', 'Jeddah'], ['makkah', 'مكة المكرمة', 'Makkah'], ['madinah', 'المدينة المنورة', 'Madinah'],
         ['eastern', 'الدمام والخبر والمنطقة الشرقية', 'Dammam, Khobar and the Eastern Province'], ['other_sa', 'منطقة أخرى في السعودية', 'Elsewhere in Saudi Arabia']] },
-    eg: { name: ['مصر', 'Egypt'], in: ['في مصر', 'in Egypt'], citizen: ['مواطن مصري', 'Egyptian citizen'], cur: ['ج.م', 'EGP'], bands: [5000, 20000, 60000], tz: 'Africa/Cairo',
+    eg: { name: ['مصر', 'Egypt'], in: ['في مصر', 'in Egypt'], citizen: ['مواطن مصري', 'Egyptian citizen'], dial: '+20', cur: ['ج.م', 'EGP'], bands: [5000, 20000, 60000], tz: 'Africa/Cairo',
       areas: [['cairo', 'القاهرة', 'Cairo'], ['giza', 'الجيزة', 'Giza'], ['new_cities', 'القاهرة الجديدة أو 6 أكتوبر أو الشيخ زايد', 'New Cairo, 6th of October or Sheikh Zayed'],
         ['alexandria', 'الإسكندرية', 'Alexandria'], ['delta_canal', 'الدلتا ومدن القناة', 'Delta and Canal cities'], ['upper_egypt', 'الصعيد', 'Upper Egypt'], ['other_eg', 'منطقة أخرى في مصر', 'Elsewhere in Egypt']] },
     other: { name: ['دول أخرى', 'Other countries'], in: ['في بلد إقامتك', 'in your country'], inR: ['في دول أخرى', 'in other countries'], citizen: ['مواطن في بلد إقامتي', 'A citizen of the country I live in'],

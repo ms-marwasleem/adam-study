@@ -28,6 +28,8 @@
     else if (S.entry === 'waitlist') S.view = 'waitlist';
 
     function L(k, v) { return A.t(k, S.lang, v); }
+    // Phone placeholder shows the chosen country's dialing code ("+" when the country is not known or is "other")
+    function dial(c) { var ci = A.countryInfo(c || country); return (ci && ci.dial) || '+'; }
     function setDir() {
       document.documentElement.lang = S.lang;
       document.documentElement.dir = S.lang === 'en' ? 'ltr' : 'rtl';
@@ -85,6 +87,7 @@
     function render() {
       A.setCountry(S.view === 'start' ? '' : country);
       setDir();
+      document.title = L('brand_generic');
       root.innerHTML = '';
       if (A.isDemo()) root.appendChild(el('div', { class: 'demo-banner', text: L('demo_banner') }));
       root.appendChild(el('div', { class: 'serration', 'aria-hidden': 'true' }));
@@ -218,7 +221,7 @@
       var form = el('form', { class: 'fields', novalidate: true });
       var fName = field('w_name', L('f_first'), 'text', { autocomplete: 'given-name', maxlength: '60' });
       var fEmail = field('w_email', L('f_email'), 'email', { autocomplete: 'email', maxlength: '120', inputmode: 'email' });
-      var fWa = field('w_whatsapp', L('f_whatsapp'), 'tel', { autocomplete: 'tel', maxlength: '30', placeholder: '+974', dir: 'ltr' });
+      var fWa = field('w_whatsapp', L('f_whatsapp'), 'tel', { autocomplete: 'tel', maxlength: '30', placeholder: dial(), dir: 'ltr' });
       var typeSel = null;
       if (opts.askType) {
         typeSel = el('select', { id: 'w_type', name: 'w_type', onchange: function (e) { S.wlType = e.target.value; } },
@@ -227,8 +230,9 @@
       }
       var countrySel = null;
       if (!country) { // standalone waitlist link: ask the country here
-        countrySel = el('select', { id: 'w_country', name: 'w_country' }, A.Q.country.opts.map(function (o) { return el('option', { value: o[0], text: o[1 + A.langIndex(S.lang)] }); }));
+        countrySel = el('select', { id: 'w_country', name: 'w_country', onchange: function (e) { fWa.input.placeholder = dial(e.target.value); } }, A.Q.country.opts.map(function (o) { return el('option', { value: o[0], text: o[1 + A.langIndex(S.lang)] }); }));
         form.appendChild(el('div', { class: 'field' }, [el('label', { for: 'w_country', text: A.question('country', S.lang) }), countrySel]));
+        fWa.input.placeholder = dial(countrySel.value);
       }
       form.appendChild(fName.node); form.appendChild(fEmail.node); form.appendChild(fWa.node); form.appendChild(honeypot());
       form.appendChild(el('button', { class: 'btn block', type: 'submit', text: L('wl_submit') }));
@@ -314,7 +318,7 @@
         business: field('c_business', L('c_business'), 'text', { autocomplete: 'organization', maxlength: '100' }),
         cr: field('c_cr', L('c_cr'), 'text', { maxlength: '30', dir: 'ltr', inputmode: 'numeric' }),
         email: field('c_email', L('c_email'), 'email', { autocomplete: 'email', maxlength: '120', inputmode: 'email' }),
-        phone: field('c_phone', L('c_phone'), 'tel', { autocomplete: 'tel', maxlength: '30', placeholder: '+974', dir: 'ltr' })
+        phone: field('c_phone', L('c_phone'), 'tel', { autocomplete: 'tel', maxlength: '30', placeholder: dial(), dir: 'ltr' })
       };
       var area = el('select', { id: 'c_area', name: 'c_area' }, A.Q.r_area.opts.filter(function (o) { return o[0] !== 'outside'; })
         .map(function (o) { return el('option', { value: o[0], text: o[1 + li] }); }));

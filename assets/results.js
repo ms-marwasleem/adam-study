@@ -104,15 +104,20 @@
       return el('div', { class: 'panel' }, [el('h3', { text: title }), sub ? el('p', { class: 'sub', text: sub }) : null, body]);
     }
 
+    function brandText() {
+      return (A.cfg().PROJECT_NAME || '') + (lang === 'ar' ? ' · نتائج التحقق · ' : ' · Validation results · ') + CI.name[A.langIndex(lang)];
+    }
+
     function render() {
       A.setCountry(country);
+      document.title = brandText();
       document.documentElement.lang = lang;
       document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
       root.innerHTML = '';
       if (data && data.demo) root.appendChild(el('div', { class: 'demo-banner', text: L('demo') }));
       root.appendChild(el('div', { class: 'serration', 'aria-hidden': 'true' }));
       root.appendChild(el('div', { class: 'topbar' }, [
-        el('span', { class: 'brand', text: (A.cfg().PROJECT_NAME || '') + (lang === 'ar' ? ' · نتائج التحقق · ' : ' · Validation results · ') + CI.name[A.langIndex(lang)] }),
+        el('span', { class: 'brand', text: brandText() }),
         el('button', { class: 'ghost', type: 'button', text: L('lang_switch'), onclick: function () { lang = lang === 'en' ? 'ar' : 'en'; render(); } })
       ]));
       var main = el('main', { class: 'dash' });
