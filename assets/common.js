@@ -290,6 +290,42 @@
   }
 
   // ---------- URL params (query string or #hash tokens) ----------
+
+  /* Where the visitor came from, without needing a different link per channel.
+     1) a src / utm_source on the link always wins (short codes like wa, ig are expanded)
+     2) otherwise the in-app browser of Instagram, Facebook, LinkedIn, Snapchat, TikTok or X
+     3) otherwise the referring site
+     WhatsApp, SMS, email and copied links pass nothing, so they show as direct. */
+  var SRC_ALIAS = { wa: 'whatsapp', fb: 'facebook', ig: 'instagram', insta: 'instagram', sc: 'snapchat', snap: 'snapchat',
+    li: 'linkedin', x: 'x', tw: 'x', twitter: 'x', tt: 'tiktok', tg: 'telegram', yt: 'youtube', em: 'email', mail: 'email', gg: 'google' };
+  var SRC_HOSTS = [
+    [/(^|\.)(facebook\.com|fb\.com|fb\.me|messenger\.com)$/, 'facebook'], [/(^|\.)instagram\.com$/, 'instagram'],
+    [/(^|\.)(linkedin\.com|lnkd\.in)$/, 'linkedin'], [/(^|\.)(t\.co|twitter\.com|x\.com)$/, 'x'],
+    [/(^|\.)snapchat\.com$/, 'snapchat'], [/(^|\.)tiktok\.com$/, 'tiktok'], [/(^|\.)(t\.me|telegram\.org|telegram\.me)$/, 'telegram'],
+    [/(^|\.)(whatsapp\.com|wa\.me)$/, 'whatsapp'], [/(^|\.)(youtube\.com|youtu\.be)$/, 'youtube'],
+    [/(^|\.)google\.[a-z.]+$/, 'google'], [/(^|\.)bing\.com$/, 'bing'],
+    [/(^|\.)(mail\.google\.com|outlook\.(live|office)\.com|mail\.yahoo\.com)$/, 'email']
+  ];
+  function detectSource(P) {
+    var manual = String(P.src || P.utm_source || '').trim().toLowerCase().slice(0, 60);
+    if (manual) return { src: SRC_ALIAS[manual] || manual, how: 'link' };
+    var ua = navigator.userAgent || '';
+    if (/Instagram/i.test(ua)) return { src: 'instagram', how: 'auto' };
+    if (/FBAN|FBAV|FB_IAB|FBIOS|FB4A/.test(ua)) return { src: 'facebook', how: 'auto' };
+    if (/LinkedInApp/i.test(ua)) return { src: 'linkedin', how: 'auto' };
+    if (/Snapchat/i.test(ua)) return { src: 'snapchat', how: 'auto' };
+    if (/musical_ly|BytedanceWebview|TikTok/i.test(ua)) return { src: 'tiktok', how: 'auto' };
+    if (/Twitter/i.test(ua)) return { src: 'x', how: 'auto' };
+    if (P.fbclid) return { src: 'facebook', how: 'auto' };
+    var host = '';
+    try { host = document.referrer ? new URL(document.referrer).hostname.toLowerCase() : ''; } catch (e) {}
+    if (host && host !== location.hostname) {
+      for (var i = SRC_HOSTS.length - 1; i >= 0; i--) if (SRC_HOSTS[i][0].test(host)) return { src: SRC_HOSTS[i][1], how: 'auto' };
+      return { src: host.replace(/^www\./, '').slice(0, 60), how: 'auto' };
+    }
+    return { src: '', how: '' };
+  }
+
   function params() {
     var out = {};
     try {
@@ -454,7 +490,7 @@
   window.Adam = {
     Q: Q, FLOWS: FLOWS, EXTRA: EXTRA, T: T, TERMS: TERMS, TERMS_VERSION: TERMS_VERSION,
     t: t, label: label, question: question, codes: codes, langIndex: langIndex,
-    params: params, uid: uid, store: store, cfg: cfg, isDemo: isDemo,
+    params: params, detectSource: detectSource, uid: uid, store: store, cfg: cfg, isDemo: isDemo,
     COUNTRIES: COUNTRIES, COUNTRY_CODES: COUNTRY_CODES, setCountry: setCountry, country: country, countryInfo: countryInfo,
     countryPhrase: countryPhrase, validCountry: validCountry, targets: targets,
     submit: submit, stats: stats, admin: admin, demoRows: demoRows,

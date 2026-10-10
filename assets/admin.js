@@ -18,7 +18,7 @@
     by_country: ['مقارنة الدول', 'Countries compared'],
     cc_trust: ['يثقون بالأشخاص أكثر', 'Trust people most'], cc_pay: ['أعمال مستعدة للدفع', 'Businesses that would pay'],
     f_range: ['الفترة', 'Period'], all: ['كل الفترة', 'All time'], d7: ['آخر 7 أيام', 'Last 7 days'], d30: ['آخر 30 يوماً', 'Last 30 days'],
-    f_src: ['المصدر', 'Source'], f_lang: ['اللغة', 'Language'], f_dev: ['الجهاز', 'Device'], any: ['الكل', 'All'], direct: ['مباشر / غير معروف', 'Direct / unknown'],
+    f_src: ['المصدر', 'Source'], f_lang: ['اللغة', 'Language'], f_dev: ['الجهاز', 'Device'], any: ['الكل', 'All'], direct: ['مباشر (غالباً واتساب أو رسالة) / غير معروف', 'Direct (often WhatsApp or a message) / unknown'],
     t_over: ['نظرة عامة', 'Overview'], t_res: ['المقيمون', 'Residents'], t_biz: ['أصحاب الأعمال', 'Businesses'],
     t_wl: ['قائمة الانتظار', 'Waitlist'], t_com: ['تسجيلات التجربة', 'Pilot sign-ups'], t_src: ['المصادر والقنوات', 'Sources & channels'],
     m_res: ['استبيانات المقيمين', 'Resident surveys'], m_wl: ['مقيمون في قائمة الانتظار', 'Residents on the waitlist'],
@@ -223,7 +223,9 @@
     function bySrc(list) {
       var o = {}; list.forEach(function (r) { var k = r.src || '_none'; o[k] = (o[k] || 0) + 1; }); return o;
     }
-    function srcLabel(k) { return k === '_none' ? L('direct') : k; }
+    var SRC_NAMES = { whatsapp: 'WhatsApp', facebook: 'Facebook', instagram: 'Instagram', linkedin: 'LinkedIn', x: 'X', snapchat: 'Snapchat',
+      tiktok: 'TikTok', telegram: 'Telegram', youtube: 'YouTube', google: 'Google', bing: 'Bing', email: 'Email', share: ['مشاركة من مشارك', 'Shared by a participant'] };
+    function srcLabel(k) { if (k === '_none') return L('direct'); var n = SRC_NAMES[k]; return n ? (typeof n === 'string' ? n : n[A.langIndex(lang)]) : k; }
 
     function vSources(main, D) {
       var srcs = {};

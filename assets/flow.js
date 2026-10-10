@@ -17,7 +17,7 @@
       view: 'start', kind: null, i: 0, answers: {}, started: Date.now(),
       entry: ['resident', 'business', 'waitlist'].indexOf(P.p) >= 0 ? P.p : 'start',
       meta: {
-        src: (P.src || P.utm_source || '').slice(0, 60), med: (P.utm_medium || '').slice(0, 60),
+        src: A.detectSource(P).src, med: (P.utm_medium || A.detectSource(P).how || '').slice(0, 60),
         camp: (P.utm_campaign || '').slice(0, 60), ref: (P.ref || '').slice(0, 60),
         device: (coarse || window.innerWidth < 760) ? 'mobile' : 'desktop'
       },
