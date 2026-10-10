@@ -65,6 +65,7 @@
     ]],
     period: ['فترة الجمع: {a} – {b}', 'Collection period: {a} – {b}'],
     demo: ['بيانات تجريبية للعرض فقط. ستظهر الأرقام الحقيقية بعد ربط الصفحة بالشيت.', 'Sample data for preview only. Real numbers appear once the page is connected.'],
+    loading: ['جاري تحميل النتائج المباشرة…', 'Loading live results…'],
     error: ['تعذّر تحميل النتائج الآن. سنحاول مجدداً تلقائياً.', 'Couldn’t load results right now. Retrying automatically.']
   };
 
@@ -94,8 +95,28 @@
       try { return new Date(iso).toLocaleDateString(lang === 'ar' ? 'ar-QA' : 'en-GB', { timeZone: CI.tz, day: 'numeric', month: 'short', year: 'numeric' }); } catch (e) { return iso; }
     }
 
-    function load() {
-      A.stats(country).then(function (s) { data = s; failed = false; render(); }).catch(function () { failed = true; render(); });
+    // The last numbers seen on this device show at once, then the live ones replace them.
+    var SAVE_KEY = 'adam_results_' + country;
+    try { var kept = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (kept && kept.counts && !A.isDemo()) data = kept; } catch (e) {}
+
+    function load(tries) {
+      tries = tries || 0;
+      A.stats(country).then(function (s) {
+        data = s; failed = false; render();
+        try { if (!s.demo) localStorage.setItem(SAVE_KEY, JSON.stringify(s)); } catch (e) {}
+      }).catch(function () {
+        if (tries < 2) { setTimeout(function () { load(tries + 1); }, 2000); return; } // quietly try again first
+        failed = true; render();
+      });
+    }
+
+    function skeleton() {
+      var card = function () { return el('div', { class: 'panel meter skel' }, [el('i'), el('b'), el('i')]); };
+      return el('div', {}, [
+        el('p', { class: 'loading-note', text: L('loading') }),
+        el('div', { class: 'grid g4' }, [card(), card(), card(), card()]),
+        el('div', { class: 'grid g3', style: 'margin-top:16px' }, [card(), card(), card()])
+      ]);
     }
 
     function panel(title, sub, body) {
@@ -127,7 +148,7 @@
         data ? el('div', { class: 'live', text: L('updated', { t: fmtTime(data.updated) }) }) : null
       ]));
       if (failed && !data) { main.appendChild(el('div', { class: 'error-box', text: L('error') })); return; }
-      if (!data) { main.appendChild(el('p', { class: 'lead', text: '…' })); return; }
+      if (!data) { main.appendChild(skeleton()); return; }
 
       var c = data.counts, li = A.langIndex(lang);
       // Progress
