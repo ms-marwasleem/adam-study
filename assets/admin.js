@@ -10,6 +10,14 @@
     key: ['مفتاح الدخول', 'Access key'],
     key_hint: ['المفتاح الذي ظهر لك عند إعداد Google Sheets.', 'The key shown to you when you set up Google Sheets.'],
     enter: ['دخول', 'Open dashboard'],
+    f_incl: ['الردود', 'Responses'], incl_all: ['كل الإجابات (حتى غير المكتملة)', 'All answers (incl. unfinished)'], incl_counted: ['المكتملة فقط (زي صفحة اللجنة)', 'Finished only (as on the public page)'],
+    refresh_failed: ['تعذّر التحديث الآن، المعروض هو آخر بيانات تم تحميلها.', 'Couldn’t refresh just now; showing the last data loaded.'],
+    m_res_total: ['استبيانات المقيمين (الإجمالي)', 'Resident surveys (total)'], m_biz_total: ['استبيانات أصحاب الأعمال (الإجمالي)', 'Business surveys (total)'],
+    split: ['مكتمل {d} · جزئي {p}', 'Finished {d} · Partial {p}'], split_fast: ['منها {f} سريعة', '{f} of them fast'],
+    counted_note: ['المحسوب في صفحة اللجنة: {r} مقيم و{b} صاحب نشاط (المكتمل غير السريع فقط).', 'Counted on the public page: {r} residents and {b} businesses (finished and not fast only).'],
+    all_res: ['نتائج أسئلة المقيمين', 'Resident question results'], all_biz: ['نتائج أسئلة أصحاب الأعمال', 'Business question results'],
+    multi_note: ['أكثر من اختيار', 'Multiple answers'], avg: ['المتوسط {v}', 'Average {v}'],
+    highlights: ['أبرز الإجابات', 'Top answers'], highlights_sub: ['التفاصيل الكاملة لكل سؤال في تبويبي المقيمون وأصحاب الأعمال', 'Full detail for every question is in the Residents and Businesses tabs'],
     bad_key: ['المفتاح غير صحيح أو تعذّر الاتصال.', 'Wrong key, or the connection failed.'],
     logout: ['خروج', 'Sign out'],
     refresh: ['تحديث', 'Refresh'],
@@ -68,9 +76,10 @@
   };
 
   function mount(root) {
+    var refreshFailed = false;
     var lang = 'ar', key = '', rows = null, demo = false, loadedAt = null, err = '';
-    var tab = 'over', F = { country: '', range: 'all', src: '', lang: '', dev: '' }, q = '';
-    try { key = sessionStorage.getItem('adam_admin_key') || ''; } catch (e) {}
+    var tab = 'over', F = { country: '', range: 'all', src: '', lang: '', dev: '', incl: 'all' }, q = '';
+    try { key = localStorage.getItem('adam_admin_key') || ''; } catch (e) {}
 
     function L(k, v) {
       var s = S_[k] ? S_[k][A.langIndex(lang)] : k;
@@ -83,12 +92,18 @@
     }
 
     function load() {
-      err = '';
+      err = ''; refreshFailed = false;
       A.admin(key).then(function (j) {
         rows = j.rows; demo = !!j.demo; loadedAt = new Date().toISOString();
-        try { sessionStorage.setItem('adam_admin_key', key); } catch (e) {}
+        try { localStorage.setItem('adam_admin_key', key); } catch (e) {} // stay signed in on this device
         render();
-      }).catch(function () { rows = null; err = L('bad_key'); render(); });
+      }).catch(function (e) {
+        // Only a wrong key signs you out. A slow or failed refresh keeps the data on screen.
+        if (rows && !/unauthorized/.test(String(e && e.message))) { refreshFailed = true; render(); return; }
+        rows = null; err = L('bad_key');
+        if (/unauthorized/.test(String(e && e.message))) { try { localStorage.removeItem('adam_admin_key'); } catch (x) {} }
+        render();
+      });
     }
 
     function filtered(sheet) {
@@ -109,6 +124,7 @@
 
     function panel(title, body, sub) { return el('div', { class: 'panel' }, [el('h3', { text: title }), sub ? el('p', { class: 'sub', text: sub }) : null, body]); }
     function head(title, note) { return el('div', { class: 'section-head' }, [el('h2', { text: title }), note ? el('span', { text: note }) : null]); }
+    function nA(group, field) { return (group.ans && group.ans[field]) || 0; }
     function bars(counts, n, field, extra) { return C.bars(counts, n, Object.assign({ field: field, lang: lang, emptyMsg: L('none') }, extra || {})); }
 
     function csv(name, cols, list) {
@@ -176,14 +192,49 @@
       main.appendChild(form);
     }
 
-    function vOverview(main, D, S) {
-      var c = S.counts;
+    function vOverview(main, D, S, Sc) {
+      var c = Sc.counts;
+      var A_ = AdamStats.compute(D, { all: true }).counts;
+      function split(rows) {
+        var done = rows.filter(function (r) { return !AdamStats.isPartial(r); });
+        var fast = done.filter(function (r) { return /fast/.test(r.flag || ''); }).length;
+        return { total: rows.length, done: done.length, part: rows.length - done.length, fast: fast };
+      }
+      var R = split(D.Residents), B = split(D.Businesses);
+      function foot(x) { return L('split', { d: x.done, p: x.part }) + (x.fast ? ' · ' + L('split_fast', { f: x.fast }) : ''); }
       main.appendChild(el('div', { class: 'grid g4' }, [
-        C.stat(L('m_res'), c.residents), C.stat(L('m_wl'), c.waitlist),
-        C.stat(L('m_biz'), c.businesses), C.stat(L('m_com'), c.commitments)
+        C.stat(L('m_res_total'), R.total, foot(R)),
+        C.stat(L('m_wl'), A_.waitlist),
+        C.stat(L('m_biz_total'), B.total, foot(B)),
+        C.stat(L('m_com'), A_.commitments)
       ]));
-      var flagged = [].concat(D.Residents, D.Waitlist, D.Businesses, D.Commitments).filter(function (r) { return r.flag; }).length;
-      main.appendChild(el('p', { class: 'note', text: L('excluded', { p: c.partial_residents + c.partial_businesses, o: c.screened_out, f: flagged }) }));
+      main.appendChild(el('p', { class: 'note', text: L('counted_note', { r: c.residents, b: c.businesses }) }));
+
+      // Results for every question, in the order people see them (the filters above apply)
+      var counted = F.incl !== 'all';
+      function pool(sheet) {
+        return D[sheet].filter(function (r) { return !counted || (!r.flag && !AdamStats.isPartial(r)); });
+      }
+      function questionPanels(sheet, flow) {
+        var rows = pool(sheet);
+        return flow.map(function (f) {
+          var q = A.Q[f] || {};
+          var answered = rows.filter(function (r) { return r[f] !== '' && r[f] !== undefined && r[f] !== null; });
+          var n = answered.length, body;
+          if (q.type === 'scale') {
+            var cols = {}, sum = 0;
+            answered.forEach(function (r) { var v = parseInt(r[f], 10); if (v >= q.min && v <= q.max) { cols[v] = (cols[v] || 0) + 1; sum += v; } });
+            body = n ? el('div', null, [C.columns(cols, q.min, q.max), el('p', { class: 'sub', style: 'margin-top:8px', text: L('avg', { v: Math.round(sum / n * 10) / 10 }) })]) : el('p', { class: 'sub', text: L('none') });
+          } else {
+            body = bars(AdamStats.tally(answered, f, q.type === 'multi'), n, f, (q.type === 'multi' || f === 'r_area') ? {} : { order: 'schema' });
+          }
+          return panel(A.question(f, lang), body, (q.type === 'multi' ? L('multi_note') + ' · ' : '') + 'n = ' + n);
+        });
+      }
+      main.appendChild(head(L('all_res'), counted ? L('incl_counted') : L('incl_all')));
+      main.appendChild(el('div', { class: 'grid g3' }, questionPanels('Residents', A.FLOWS.resident)));
+      main.appendChild(head(L('all_biz'), counted ? L('incl_counted') : L('incl_all')));
+      main.appendChild(el('div', { class: 'grid g3' }, questionPanels('Businesses', A.FLOWS.business)));
 
       var resIds = {}; D.Waitlist.forEach(function (w) { if (w.survey_id) resIds[w.survey_id] = 1; });
       var resOk = D.Residents.filter(function (r) { return r.r_area !== 'outside' && !r.flag && !AdamStats.isPartial(r); });
@@ -265,21 +316,21 @@
       var crossPct = {}; Object.keys(base).forEach(function (k) { crossPct[k] = Math.round(((cross[k] || 0) / base[k]) * 100); });
       main.appendChild(head(L('profile'), 'n = ' + n));
       main.appendChild(el('div', { class: 'grid g3' }, [
-        panel(L('area'), bars(r.area, n, 'r_area')), panel(L('status'), bars(r.status, n, 'r_status', { order: 'schema' })), panel(L('age'), bars(r.age, n, 'r_age', { order: 'schema' }))
+        panel(L('area'), bars(r.area, nA(r, 'r_area'), 'r_area')), panel(L('status'), bars(r.status, nA(r, 'r_status'), 'r_status', { order: 'schema' })), panel(L('age'), bars(r.age, nA(r, 'r_age'), 'r_age', { order: 'schema' }))
       ]));
       main.appendChild(head(L('behaviour')));
       main.appendChild(el('div', { class: 'grid g2' }, [
-        panel(L('sources'), bars(r.sources, n, 'r_sources', { highlight: ['friends', 'groups'] })),
-        panel(L('trust'), bars(r.trust, n, 'r_trust', { highlight: ['friends', 'groups'] })),
-        panel(L('pain'), bars(r.pain, n, 'r_pain')),
-        panel(L('recos'), bars(r.recos, n, 'r_recos', { order: 'schema', highlight: ['3_5', '6p'] })),
-        panel(L('disappoint'), bars(r.disappoint, n, 'r_disappoint', { order: 'schema', highlight: ['often', 'sometimes'] })),
-        panel(L('category'), bars(r.category, n, 'r_category')),
-        panel(L('satisfaction'), bars(r.satisfaction, n, 'r_satisfaction', { order: 'schema', highlight: ['unsat', 'very_unsat'] })),
-        panel(L('interest'), bars(r.interest, n, 'r_interest', { order: 'schema', highlight: ['very', 'somewhat'] })),
-        panel(L('features'), bars(r.features, n, 'r_features')),
-        panel(L('free'), bars(r.free, n, 'r_free', { order: 'schema', highlight: ['definitely', 'likely'] })),
-        panel(L('rpay'), bars(r.pay, n, 'r_pay', { order: 'schema', highlight: ['yes', 'maybe'] })),
+        panel(L('sources'), bars(r.sources, nA(r, 'r_sources'), 'r_sources', { highlight: ['friends', 'groups'] })),
+        panel(L('trust'), bars(r.trust, nA(r, 'r_trust'), 'r_trust', { highlight: ['friends', 'groups'] })),
+        panel(L('pain'), bars(r.pain, nA(r, 'r_pain'), 'r_pain')),
+        panel(L('recos'), bars(r.recos, nA(r, 'r_recos'), 'r_recos', { order: 'schema', highlight: ['3_5', '6p'] })),
+        panel(L('disappoint'), bars(r.disappoint, nA(r, 'r_disappoint'), 'r_disappoint', { order: 'schema', highlight: ['often', 'sometimes'] })),
+        panel(L('category'), bars(r.category, nA(r, 'r_category'), 'r_category')),
+        panel(L('satisfaction'), bars(r.satisfaction, nA(r, 'r_satisfaction'), 'r_satisfaction', { order: 'schema', highlight: ['unsat', 'very_unsat'] })),
+        panel(L('interest'), bars(r.interest, nA(r, 'r_interest'), 'r_interest', { order: 'schema', highlight: ['very', 'somewhat'] })),
+        panel(L('features'), bars(r.features, nA(r, 'r_features'), 'r_features')),
+        panel(L('free'), bars(r.free, nA(r, 'r_free'), 'r_free', { order: 'schema', highlight: ['definitely', 'likely'] })),
+        panel(L('rpay'), bars(r.pay, nA(r, 'r_pay'), 'r_pay', { order: 'schema', highlight: ['yes', 'maybe'] })),
         dropoff(D.Residents, A.FLOWS.resident),
         panel(L('trust_by_status'), C.bars(crossPct, 100, { field: 'r_status', lang: lang, order: 'schema', raw: false, labeler: function (k) { return A.label('r_status', k, lang) + ' (n=' + base[k] + ')'; } }))
       ]));
@@ -291,15 +342,15 @@
       var b = S.biz, n = b.n;
       main.appendChild(head(L('t_biz'), 'n = ' + n));
       main.appendChild(el('div', { class: 'grid g3' }, [
-        panel(L('btype'), bars(b.type, n, 'b_type')), panel(L('role'), bars(b.role, n, 'b_role')),
-        panel(L('branches'), bars(b.branches, n, 'b_branches', { order: 'schema' })), panel(L('bage'), bars(b.age, n, 'b_age', { order: 'schema' })),
-        panel(L('channels'), bars(b.channels, n, 'b_channels', { highlight: ['wom'] })), panel(L('wom'), bars(b.wom, n, 'b_wom', { order: 'schema' })),
-        panel(L('challenge'), bars(b.challenge, n, 'b_challenge')), panel(L('spend'), bars(b.spend, n, 'b_spend', { order: 'schema' })),
-        panel(L('update'), bars(b.update, n, 'b_update', { order: 'schema' })), panel(L('wrong_info'), bars(b.wrong_info, n, 'b_wrong_info', { order: 'schema', highlight: ['often', 'sometimes'] })),
-        panel(L('inquiries'), bars(b.inquiries, n, 'b_inquiries')), panel(L('inq_time'), bars(b.inq_time, n, 'b_inq_time', { order: 'schema', highlight: ['1_3', '3p'] })),
-        panel(L('tools'), bars(b.tools, n, 'b_tools', { order: 'schema' })), panel(L('tools_sat'), bars(b.tools_sat, n, 'b_tools_sat', { order: 'schema' })),
-        panel(L('goals'), bars(b.goals, n, 'b_goals')), panel(L('success'), bars(b.success, n, 'b_success')),
-        panel(L('pay'), bars(b.pay, n, 'b_pay')), panel(L('pilot'), bars(b.pilot, n, 'b_pilot', { order: 'schema' })),
+        panel(L('btype'), bars(b.type, nA(b, 'b_type'), 'b_type')), panel(L('role'), bars(b.role, nA(b, 'b_role'), 'b_role')),
+        panel(L('branches'), bars(b.branches, nA(b, 'b_branches'), 'b_branches', { order: 'schema' })), panel(L('bage'), bars(b.age, nA(b, 'b_age'), 'b_age', { order: 'schema' })),
+        panel(L('channels'), bars(b.channels, nA(b, 'b_channels'), 'b_channels', { highlight: ['wom'] })), panel(L('wom'), bars(b.wom, nA(b, 'b_wom'), 'b_wom', { order: 'schema' })),
+        panel(L('challenge'), bars(b.challenge, nA(b, 'b_challenge'), 'b_challenge')), panel(L('spend'), bars(b.spend, nA(b, 'b_spend'), 'b_spend', { order: 'schema' })),
+        panel(L('update'), bars(b.update, nA(b, 'b_update'), 'b_update', { order: 'schema' })), panel(L('wrong_info'), bars(b.wrong_info, nA(b, 'b_wrong_info'), 'b_wrong_info', { order: 'schema', highlight: ['often', 'sometimes'] })),
+        panel(L('inquiries'), bars(b.inquiries, nA(b, 'b_inquiries'), 'b_inquiries')), panel(L('inq_time'), bars(b.inq_time, nA(b, 'b_inq_time'), 'b_inq_time', { order: 'schema', highlight: ['1_3', '3p'] })),
+        panel(L('tools'), bars(b.tools, nA(b, 'b_tools'), 'b_tools', { order: 'schema' })), panel(L('tools_sat'), bars(b.tools_sat, nA(b, 'b_tools_sat'), 'b_tools_sat', { order: 'schema' })),
+        panel(L('goals'), bars(b.goals, nA(b, 'b_goals'), 'b_goals')), panel(L('success'), bars(b.success, nA(b, 'b_success'), 'b_success')),
+        panel(L('pay'), bars(b.pay, nA(b, 'b_pay'), 'b_pay')), panel(L('pilot'), bars(b.pilot, nA(b, 'b_pilot'), 'b_pilot', { order: 'schema' })),
         panel(L('priority'), el('div', null, [C.columns(b.priority, 1, 10), el('p', { class: 'sub', style: 'margin-top:8px', text: 'avg ' + (b.priority_avg || '–') })])),
         dropoff(D.Businesses, A.FLOWS.business)
       ]));
@@ -332,6 +383,7 @@
         sel('f-range', L('f_range'), F.range, [['all', L('all')], ['d7', L('d7')], ['d30', L('d30')]], function (v) { F.range = v; }),
         sel('f-src', L('f_src'), F.src, [['', L('any')]].concat(Object.keys(srcs).map(function (k) { return [k, srcLabel(k)]; })), function (v) { F.src = v; }),
         sel('f-lang', L('f_lang'), F.lang, [['', L('any')], ['ar', 'AR'], ['en', 'EN']], function (v) { F.lang = v; }),
+        sel('f-incl', L('f_incl'), F.incl, [['all', L('incl_all')], ['counted', L('incl_counted')]], function (v) { F.incl = v; }),
         sel('f-dev', L('f_dev'), F.dev, [['', L('any')], ['mobile', A.label('device', 'mobile', lang)], ['desktop', A.label('device', 'desktop', lang)]], function (v) { F.dev = v; })
       ]));
     }
@@ -347,7 +399,7 @@
         el('span', { class: 'brand', text: (A.cfg().PROJECT_NAME || '') + ' · ' + L('title') }),
         el('div', { style: 'display:flex;gap:8px;flex-wrap:wrap' }, [
           rows ? el('button', { class: 'ghost', type: 'button', text: L('refresh'), onclick: load }) : null,
-          rows ? el('button', { class: 'ghost', type: 'button', text: L('logout'), onclick: function () { rows = null; key = ''; try { sessionStorage.removeItem('adam_admin_key'); } catch (e) {} render(); } }) : null,
+          rows ? el('button', { class: 'ghost', type: 'button', text: L('logout'), onclick: function () { rows = null; key = ''; try { localStorage.removeItem('adam_admin_key'); } catch (e) {} render(); } }) : null,
           el('button', { class: 'ghost', type: 'button', text: L('lang_switch'), onclick: function () { lang = lang === 'ar' ? 'en' : 'ar'; render(); } })
         ])
       ]));
@@ -356,17 +408,17 @@
       if (!rows) { vLogin(main); return; }
 
       main.appendChild(el('header', { class: 'hero', style: 'padding-bottom:8px' }, [
-        el('h1', { text: L('title') }), el('p', { text: L('sub') }), el('div', { class: 'live', text: L('loaded', { t: fmt(loadedAt) }) })
+        el('h1', { text: L('title') }), el('p', { text: L('sub') }), el('div', { class: 'live', text: L('loaded', { t: fmt(loadedAt) }) }), refreshFailed ? el('p', { class: 'note', text: L('refresh_failed') }) : null
       ]));
       filters(main);
       var tabs = [['over', 't_over'], ['res', 't_res'], ['biz', 't_biz'], ['wl', 't_wl'], ['com', 't_com'], ['src', 't_src']];
       main.appendChild(el('div', { class: 'tabs', role: 'tablist' }, tabs.map(function (t) {
         return el('button', { type: 'button', role: 'tab', 'aria-selected': tab === t[0] ? 'true' : 'false', text: L(t[1]), onclick: function () { tab = t[0]; q = ''; render(); } });
       })));
-      var D = filteredAll(), S = AdamStats.compute(D);
+      var D = filteredAll(), S = AdamStats.compute(D, { all: F.incl === 'all' }), Sc = AdamStats.compute(D);
       var body = el('div', { role: 'tabpanel', style: 'margin-top:18px' });
       main.appendChild(body);
-      ({ over: vOverview, res: vResidents, biz: vBusinesses, wl: vWaitlist, com: vCommitments, src: vSources })[tab](body, D, S);
+      ({ over: vOverview, res: vResidents, biz: vBusinesses, wl: vWaitlist, com: vCommitments, src: vSources })[tab](body, D, S, Sc);
     }
 
     render();

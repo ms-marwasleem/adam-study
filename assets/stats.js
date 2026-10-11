@@ -77,6 +77,13 @@ var AdamStats = (function () {
 
   function answered(rows, key) { return rows.filter(function (r) { return r[key] !== '' && r[key] !== null && r[key] !== undefined; }); }
 
+  // How many people answered each question (unfinished surveys answer only some)
+  function answeredCounts(rows) {
+    var out = {};
+    rows.forEach(function (r) { Object.keys(r).forEach(function (k) { if (r[k] !== '' && r[k] !== null && r[k] !== undefined) out[k] = (out[k] || 0) + 1; }); });
+    return out;
+  }
+
   function countryOf(r) { return r.country || 'qa'; } // rows saved before countries were added are Qatar
 
   // opts.country: only that country's rows; leave it out for all countries together
@@ -88,12 +95,14 @@ var AdamStats = (function () {
       Object.keys(all).forEach(function (k) { only[k] = (all[k] || []).filter(function (r) { return countryOf(r) === c; }); });
       all = only;
     }
-    var resAll = clean(all.Residents);
+    // opts.all (internal dashboard): also count unfinished and flagged answers
+    var keep = (opts && opts.all) ? function (rows) { return rows || []; } : clean;
+    var resAll = keep(all.Residents);
     var res = resAll.filter(function (r) { return r.r_area && r.r_area !== 'outside'; });
     // Waitlist = residents who want to use the app at launch (business owners are counted in the pilot instead)
-    var wl = uniqueBy(clean(all.Waitlist).filter(function (r) { return r.w_type !== 'business'; }), 'w_email');
-    var biz = clean(all.Businesses);
-    var com = uniqueBy(clean(all.Commitments).map(function (r) {
+    var wl = uniqueBy(keep(all.Waitlist).filter(function (r) { return r.w_type !== 'business'; }), 'w_email');
+    var biz = keep(all.Businesses);
+    var com = uniqueBy(keep(all.Commitments).map(function (r) {
       // one sign-up per email, or per mobile number when no email was given
       return Object.assign({}, r, { _contact: r.c_email || String(r.c_phone || '').replace(/\D/g, '') });
     }), '_contact');
@@ -146,6 +155,7 @@ var AdamStats = (function () {
         pain: tally(res, 'r_pain', true),
         recos: tally(res, 'r_recos'),
         disappoint: tally(res, 'r_disappoint'),
+        ans: answeredCounts(res),
         satisfaction: tally(res, 'r_satisfaction'),
         interest: tally(res, 'r_interest'),
         features: tally(res, 'r_features', true),
@@ -155,6 +165,7 @@ var AdamStats = (function () {
       biz: {
         n: biz.length,
         type: tally(biz, 'b_type'),
+        ans: answeredCounts(biz),
         role: tally(biz, 'b_role'),
         branches: tally(biz, 'b_branches'),
         age: tally(biz, 'b_age'),
