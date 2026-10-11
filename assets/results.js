@@ -10,10 +10,10 @@
     lead: ['نتائج دراسة أونلاين مستمرة مع المقيمين وأصحاب الأعمال {inR}. الأرقام تتحدّث تلقائياً.', 'Results from an ongoing online study with residents and business owners {inR}. The numbers update automatically.'],
     updated: ['آخر تحديث {t} · نتائج مباشرة', 'Updated {t} · live results'],
     progress: ['الردود حتى الآن', 'Responses so far'],
-    m_res: ['مقيمون أكملوا الاستبيان', 'Residents surveyed'],
+    m_res: ['مقيمون شاركوا في الاستبيان', 'Residents who took part'],
     m_wl: ['مقيمون في قائمة الانتظار', 'Residents on the waitlist'],
     m_wl_foot: ['مقيمون سجّلوا ليستخدموا التطبيق عند إطلاقه', 'Residents who signed up to use the app at launch'],
-    m_biz: ['أصحاب أعمال أكملوا الاستبيان', 'Businesses surveyed'],
+    m_biz: ['أصحاب أعمال شاركوا في الاستبيان', 'Businesses who took part'],
     m_com: ['أصحاب أعمال في التجربة المجانية', 'Businesses in the free pilot'],
     m_com_foot: ['أصحاب أعمال سجّلوا ليجرّبوا التطبيق مجاناً قبل إطلاقه', 'Business owners who signed up to try the app free before launch'],
     findings: ['أهم النتائج', 'Key findings'],
@@ -30,6 +30,8 @@
     f_biz_wrong_info: ['من أصحاب الأعمال واجهوا مشكلات بسبب معلومات قديمة أو غير دقيقة عن نشاطهم على الإنترنت', 'of businesses have had problems from outdated or wrong information about them online'],
     f_biz_inq_1h: ['من أصحاب الأعمال يقضي فريقهم ساعة أو أكثر يومياً في الرد على استفسارات متكررة', 'of businesses spend an hour or more a day answering repeat customer questions'],
     f_biz_no_tools: ['من أصحاب الأعمال لا يستخدمون أدوات متخصصة لتحليل الأداء أو قرارات التسويق', 'of businesses don’t use specialised tools to analyse performance or guide marketing'],
+    took_part: ['شارك {s} · أكمل {d}', 'Took part {s} · Completed {d}'],
+    answered_n: ['أجاب على هذا السؤال: {n}', 'Answered this question: {n}'],
     n_of: ['{k} من {n}', '{k} of {n}'],
     pays_depends: [' · و{d} ({p}) آخرين سيدفعون حسب أداء الأداة', ' · plus {d} ({p}) who would pay depending on how well it works'],
     collecting: ['جارٍ جمع الردود (يُعرض عند {m} رداً)', 'Collecting responses (shown at {m})'],
@@ -74,11 +76,13 @@
     method: ['المنهجية', 'Method'],
     method_items: [[
       'الدراسة أونلاين بالكامل، بالعربية والإنجليزية، وتُنشر عبر قنوات تواصل {inR}.',
+      'نسبة كل سؤال محسوبة من كل من أجاب عليه، حتى لو لم يكمل الاستبيان، والعدد مكتوب تحت كل سؤال.',
       'يُستبعد من لا يقيم {inR}، والردود السريعة بشكل غير طبيعي، والتسجيلات المكررة.',
       'هذه الصفحة لا تعرض أي بيانات شخصية، فقط أرقاماً مجمّعة.',
       'تسجيلات التجربة يقدّمها أصحاب الأعمال باسم النشاط وبريد إلكتروني أو رقم جوال بعد إكمال الاستبيان.'
     ], [
       'Fully online, in Arabic and English, distributed through channels {inR}.',
+      'Each question’s percentages are based on everyone who answered it, even if they didn’t finish the survey; the count is shown under each question.',
       'Excludes people not living {inR}, unusually fast responses and repeat sign-ups.',
       'This page shows aggregate numbers only, never personal details.',
       'Pilot sign-ups are submitted by business owners with their business name and an email or mobile number after completing the survey.'
@@ -174,9 +178,9 @@
       // Progress
       main.appendChild(el('div', { class: 'section-head' }, [el('h2', { text: L('progress') })]));
       main.appendChild(el('div', { class: 'grid g4' }, [
-        C.stat(L('m_res'), c.residents),
+        C.stat(L('m_res'), c.residents_started != null ? c.residents_started : c.residents, L('took_part', { s: c.residents_started != null ? c.residents_started : c.residents, d: c.residents })),
         C.stat(L('m_wl'), c.waitlist, L('m_wl_foot')),
-        C.stat(L('m_biz'), c.businesses),
+        C.stat(L('m_biz'), c.businesses_started != null ? c.businesses_started : c.businesses, L('took_part', { s: c.businesses_started != null ? c.businesses_started : c.businesses, d: c.businesses })),
         C.stat(L('m_com'), c.commitments, L('m_com_foot'))
       ]));
 
@@ -207,46 +211,48 @@
       // Residents
       var r = data.res, rn = r.n;
       var hide = L('collecting', { m: MIN });
-      var bo = function (field, extra) { return Object.assign({ field: field, lang: lang, minN: MIN, hideMsg: hide }, extra || {}); };
-      main.appendChild(el('div', { class: 'section-head' }, [el('h2', { text: L('residents') }), el('span', { text: 'n = ' + rn })]));
+      var bo = function (field, extra) { return Object.assign({ field: field, lang: lang, minN: MIN, hideMsg: hide, nLabel: L('answered_n') }, extra || {}); };
+      // Each question counts everyone who answered it, including people who didn't finish the survey
+      var nq = function (group, field) { return (group.ans && group.ans[field]) || 0; };
+      main.appendChild(el('div', { class: 'section-head' }, [el('h2', { text: L('residents') }), el('span', { text: L('took_part', { s: r.started != null ? r.started : rn, d: rn }) })]));
       main.appendChild(el('div', { class: 'grid g2' }, [
-        panel(L('sources'), L('sources_sub'), C.bars(r.sources, rn, bo('r_sources', { highlight: ['friends', 'groups'] }))),
-        panel(L('trust'), null, C.bars(r.trust, rn, bo('r_trust', { highlight: ['friends', 'groups'] }))),
-        panel(L('pain'), L('pain_sub'), C.bars(r.pain, rn, bo('r_pain'))),
-        panel(L('recos'), null, C.bars(r.recos, rn, bo('r_recos', { order: 'schema', highlight: ['3_5', '6p'] }))),
-        panel(L('category'), L('category_sub'), C.bars(r.category, rn, bo('r_category'))),
-        panel(L('satisfaction'), null, C.bars(r.satisfaction, rn, bo('r_satisfaction', { order: 'schema', highlight: ['unsat', 'very_unsat'] }))),
-        panel(L('interest'), null, C.bars(r.interest, rn, bo('r_interest', { order: 'schema', highlight: ['very', 'somewhat'] }))),
-        panel(L('features'), L('up3'), C.bars(r.features, rn, bo('r_features'))),
-        panel(L('free'), null, C.bars(r.free, rn, bo('r_free', { order: 'schema', highlight: ['definitely', 'likely'] }))),
-        panel(L('rpay'), null, C.bars(r.pay, rn, bo('r_pay', { order: 'schema', highlight: ['yes', 'maybe'] }))),
+        panel(L('sources'), L('sources_sub'), C.bars(r.sources, nq(r, 'r_sources'), bo('r_sources', { highlight: ['friends', 'groups'] }))),
+        panel(L('trust'), null, C.bars(r.trust, nq(r, 'r_trust'), bo('r_trust', { highlight: ['friends', 'groups'] }))),
+        panel(L('pain'), L('pain_sub'), C.bars(r.pain, nq(r, 'r_pain'), bo('r_pain'))),
+        panel(L('recos'), null, C.bars(r.recos, nq(r, 'r_recos'), bo('r_recos', { order: 'schema', highlight: ['3_5', '6p'] }))),
+        panel(L('category'), L('category_sub'), C.bars(r.category, nq(r, 'r_category'), bo('r_category'))),
+        panel(L('satisfaction'), null, C.bars(r.satisfaction, nq(r, 'r_satisfaction'), bo('r_satisfaction', { order: 'schema', highlight: ['unsat', 'very_unsat'] }))),
+        panel(L('interest'), null, C.bars(r.interest, nq(r, 'r_interest'), bo('r_interest', { order: 'schema', highlight: ['very', 'somewhat'] }))),
+        panel(L('features'), L('up3'), C.bars(r.features, nq(r, 'r_features'), bo('r_features'))),
+        panel(L('free'), null, C.bars(r.free, nq(r, 'r_free'), bo('r_free', { order: 'schema', highlight: ['definitely', 'likely'] }))),
+        panel(L('rpay'), null, C.bars(r.pay, nq(r, 'r_pay'), bo('r_pay', { order: 'schema', highlight: ['yes', 'maybe'] }))),
         panel(L('profile'), null, el('div', null, [
-          C.bars(r.status, rn, bo('r_status', { order: 'schema' })),
-          C.bars(r.age, rn, bo('r_age', { order: 'schema' }))
+          C.bars(r.status, nq(r, 'r_status'), bo('r_status', { order: 'schema' })),
+          C.bars(r.age, nq(r, 'r_age'), bo('r_age', { order: 'schema' }))
         ]))
       ]));
 
       // Businesses
       var b = data.biz, bn = b.n;
-      main.appendChild(el('div', { class: 'section-head' }, [el('h2', { text: L('businesses') }), el('span', { text: 'n = ' + bn })]));
-      var prio = bn >= MIN ? el('div', null, [C.columns(b.priority, 1, 10), el('p', { class: 'sub', style: 'margin-top:10px', text: L('priority_avg', { v: b.priority_avg }) })])
+      main.appendChild(el('div', { class: 'section-head' }, [el('h2', { text: L('businesses') }), el('span', { text: L('took_part', { s: b.started != null ? b.started : bn, d: bn }) })]));
+      var prio = nq(b, 'b_priority') >= MIN ? el('div', null, [C.columns(b.priority, 1, 10), el('p', { class: 'sub', style: 'margin-top:10px', text: L('priority_avg', { v: b.priority_avg }) }), el('p', { class: 'n-label', text: L('answered_n').replace('{n}', nq(b, 'b_priority')) })])
         : el('p', { class: 'hidden-note', text: hide });
       main.appendChild(el('div', { class: 'grid g2' }, [
-        panel(L('channels'), L('channels_sub'), C.bars(b.channels, bn, bo('b_channels', { highlight: ['wom'] }))),
-        panel(L('wom'), null, C.bars(b.wom, bn, bo('b_wom', { order: 'schema', highlight: ['40_60', '60p'] }))),
-        panel(L('challenge'), null, C.bars(b.challenge, bn, bo('b_challenge'))),
-        panel(L('update'), null, C.bars(b.update, bn, bo('b_update', { order: 'schema' }))),
-        panel(L('wrong_info'), null, C.bars(b.wrong_info, bn, bo('b_wrong_info', { order: 'schema', highlight: ['often', 'sometimes'] }))),
-        panel(L('inquiries'), L('up3'), C.bars(b.inquiries, bn, bo('b_inquiries'))),
-        panel(L('inq_time'), null, C.bars(b.inq_time, bn, bo('b_inq_time', { order: 'schema', highlight: ['1_3', '3p'] }))),
-        panel(L('tools'), null, C.bars(b.tools, bn, bo('b_tools', { order: 'schema' }))),
-        panel(L('tools_sat'), null, C.bars(b.tools_sat, bn, bo('b_tools_sat', { order: 'schema' }))),
-        panel(L('goals'), L('up3'), C.bars(b.goals, bn, bo('b_goals'))),
-        panel(L('success'), L('up3'), C.bars(b.success, bn, bo('b_success'))),
+        panel(L('channels'), L('channels_sub'), C.bars(b.channels, nq(b, 'b_channels'), bo('b_channels', { highlight: ['wom'] }))),
+        panel(L('wom'), null, C.bars(b.wom, nq(b, 'b_wom'), bo('b_wom', { order: 'schema', highlight: ['40_60', '60p'] }))),
+        panel(L('challenge'), null, C.bars(b.challenge, nq(b, 'b_challenge'), bo('b_challenge'))),
+        panel(L('update'), null, C.bars(b.update, nq(b, 'b_update'), bo('b_update', { order: 'schema' }))),
+        panel(L('wrong_info'), null, C.bars(b.wrong_info, nq(b, 'b_wrong_info'), bo('b_wrong_info', { order: 'schema', highlight: ['often', 'sometimes'] }))),
+        panel(L('inquiries'), L('up3'), C.bars(b.inquiries, nq(b, 'b_inquiries'), bo('b_inquiries'))),
+        panel(L('inq_time'), null, C.bars(b.inq_time, nq(b, 'b_inq_time'), bo('b_inq_time', { order: 'schema', highlight: ['1_3', '3p'] }))),
+        panel(L('tools'), null, C.bars(b.tools, nq(b, 'b_tools'), bo('b_tools', { order: 'schema' }))),
+        panel(L('tools_sat'), null, C.bars(b.tools_sat, nq(b, 'b_tools_sat'), bo('b_tools_sat', { order: 'schema' }))),
+        panel(L('goals'), L('up3'), C.bars(b.goals, nq(b, 'b_goals'), bo('b_goals'))),
+        panel(L('success'), L('up3'), C.bars(b.success, nq(b, 'b_success'), bo('b_success'))),
         panel(L('priority'), null, prio),
-        panel(L('pay'), null, C.bars(b.pay, bn, bo('b_pay', { highlight: ['monthly', 'commission'] }))),
-        panel(L('spend'), null, C.bars(b.spend, bn, bo('b_spend', { order: 'schema' }))),
-        panel(L('btype'), null, C.bars(b.type, bn, bo('b_type'))),
+        panel(L('pay'), null, C.bars(b.pay, nq(b, 'b_pay'), bo('b_pay', { highlight: ['monthly', 'commission'] }))),
+        panel(L('spend'), null, C.bars(b.spend, nq(b, 'b_spend'), bo('b_spend', { order: 'schema' }))),
+        panel(L('btype'), null, C.bars(b.type, nq(b, 'b_type'), bo('b_type'))),
         panel(L('com_type'), null, C.bars(data.com.type, data.com.n, { field: 'b_type', lang: lang, raw: true, emptyMsg: '–' }))
       ]));
 

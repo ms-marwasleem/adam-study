@@ -10,11 +10,12 @@
     key: ['مفتاح الدخول', 'Access key'],
     key_hint: ['المفتاح الذي ظهر لك عند إعداد Google Sheets.', 'The key shown to you when you set up Google Sheets.'],
     enter: ['دخول', 'Open dashboard'],
-    f_incl: ['الردود', 'Responses'], incl_all: ['كل الإجابات (حتى غير المكتملة)', 'All answers (incl. unfinished)'], incl_counted: ['المكتملة فقط (زي صفحة اللجنة)', 'Finished only (as on the public page)'],
+    f_incl: ['الردود', 'Responses'], incl_all: ['كل الإجابات (حتى السريعة)', 'All answers (incl. fast ones)'], incl_counted: ['زي صفحة اللجنة (بدون السريعة)', 'As on the public page (no fast ones)'],
+    answered_n: ['أجاب: {n}', 'Answered: {n}'],
     refresh_failed: ['تعذّر التحديث الآن، المعروض هو آخر بيانات تم تحميلها.', 'Couldn’t refresh just now; showing the last data loaded.'],
     m_res_total: ['استبيانات المقيمين (الإجمالي)', 'Resident surveys (total)'], m_biz_total: ['استبيانات أصحاب الأعمال (الإجمالي)', 'Business surveys (total)'],
     split: ['مكتمل {d} · جزئي {p}', 'Finished {d} · Partial {p}'], split_fast: ['منها {f} سريعة', '{f} of them fast'],
-    counted_note: ['المحسوب في صفحة اللجنة: {r} مقيم و{b} صاحب نشاط (المكتمل غير السريع فقط).', 'Counted on the public page: {r} residents and {b} businesses (finished and not fast only).'],
+    counted_note: ['في صفحة اللجنة: أكمل {r} مقيم و{b} صاحب نشاط. نتائج الأسئلة هناك بتحسب كل اللي جاوب، حتى لو ما كملش، ما عدا الردود السريعة.', 'On the public page: {r} residents and {b} businesses completed. Question results there count everyone who answered, finished or not, except fast responses.'],
     all_res: ['نتائج أسئلة المقيمين', 'Resident question results'], all_biz: ['نتائج أسئلة أصحاب الأعمال', 'Business question results'],
     multi_note: ['أكثر من اختيار', 'Multiple answers'], avg: ['المتوسط {v}', 'Average {v}'],
     highlights: ['أبرز الإجابات', 'Top answers'], highlights_sub: ['التفاصيل الكاملة لكل سؤال في تبويبي المقيمون وأصحاب الأعمال', 'Full detail for every question is in the Residents and Businesses tabs'],
@@ -125,7 +126,7 @@
     function panel(title, body, sub) { return el('div', { class: 'panel' }, [el('h3', { text: title }), sub ? el('p', { class: 'sub', text: sub }) : null, body]); }
     function head(title, note) { return el('div', { class: 'section-head' }, [el('h2', { text: title }), note ? el('span', { text: note }) : null]); }
     function nA(group, field) { return (group.ans && group.ans[field]) || 0; }
-    function bars(counts, n, field, extra) { return C.bars(counts, n, Object.assign({ field: field, lang: lang, emptyMsg: L('none') }, extra || {})); }
+    function bars(counts, n, field, extra) { return C.bars(counts, n, Object.assign({ field: field, lang: lang, emptyMsg: L('none'), nLabel: L('answered_n') }, extra || {})); }
 
     function csv(name, cols, list) {
       var lines = [cols.join(',')].concat(list.map(function (r) {
@@ -213,7 +214,7 @@
       // Results for every question, in the order people see them (the filters above apply)
       var counted = F.incl !== 'all';
       function pool(sheet) {
-        return D[sheet].filter(function (r) { return !counted || (!r.flag && !AdamStats.isPartial(r)); });
+        return D[sheet].filter(function (r) { return !counted || !r.flag; });
       }
       function questionPanels(sheet, flow) {
         var rows = pool(sheet);
@@ -224,11 +225,11 @@
           if (q.type === 'scale') {
             var cols = {}, sum = 0;
             answered.forEach(function (r) { var v = parseInt(r[f], 10); if (v >= q.min && v <= q.max) { cols[v] = (cols[v] || 0) + 1; sum += v; } });
-            body = n ? el('div', null, [C.columns(cols, q.min, q.max), el('p', { class: 'sub', style: 'margin-top:8px', text: L('avg', { v: Math.round(sum / n * 10) / 10 }) })]) : el('p', { class: 'sub', text: L('none') });
+            body = n ? el('div', null, [C.columns(cols, q.min, q.max), el('p', { class: 'sub', style: 'margin-top:8px', text: L('avg', { v: Math.round(sum / n * 10) / 10 }) }), el('p', { class: 'n-label', text: L('answered_n').replace('{n}', n) })]) : el('p', { class: 'sub', text: L('none') });
           } else {
             body = bars(AdamStats.tally(answered, f, q.type === 'multi'), n, f, (q.type === 'multi' || f === 'r_area') ? {} : { order: 'schema' });
           }
-          return panel(A.question(f, lang), body, (q.type === 'multi' ? L('multi_note') + ' · ' : '') + 'n = ' + n);
+          return panel(A.question(f, lang), body, q.type === 'multi' ? L('multi_note') : null);
         });
       }
       main.appendChild(head(L('all_res'), counted ? L('incl_counted') : L('incl_all')));

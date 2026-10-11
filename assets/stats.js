@@ -97,8 +97,13 @@ var AdamStats = (function () {
     }
     // opts.all (internal dashboard): also count unfinished and flagged answers
     var keep = (opts && opts.all) ? function (rows) { return rows || []; } : clean;
+    // Answers to each question come from everyone who answered it, finished or not (suspiciously
+    // fast responses excluded). Head counts (residents, businesses) are finished surveys.
+    var pool = (opts && opts.all) ? keep : function (rows) { return (rows || []).filter(function (r) { return !r.flag; }); };
     var resAll = keep(all.Residents);
     var res = resAll.filter(function (r) { return r.r_area && r.r_area !== 'outside'; });
+    var resP = pool(all.Residents).filter(function (r) { return r.r_area !== 'outside'; });
+    var bizP = pool(all.Businesses);
     // Waitlist = residents who want to use the app at launch (business owners are counted in the pilot instead)
     var wl = uniqueBy(keep(all.Waitlist).filter(function (r) { return r.w_type !== 'business'; }), 'w_email');
     var biz = keep(all.Businesses);
@@ -122,7 +127,7 @@ var AdamStats = (function () {
 
     var priority = {};
     var psum = 0, pn = 0;
-    biz.forEach(function (r) {
+    bizP.forEach(function (r) {
       var p = parseInt(r.b_priority, 10);
       if (p >= 1 && p <= 10) { priority[p] = (priority[p] || 0) + 1; psum += p; pn++; }
     });
@@ -140,71 +145,73 @@ var AdamStats = (function () {
         businesses: biz.length,
         commitments: com.length,
         screened_out: resAll.length - res.length,
+        residents_started: resP.length,
+        businesses_started: bizP.length,
         partial_residents: (all.Residents || []).filter(isPartial).length,
         partial_businesses: (all.Businesses || []).filter(isPartial).length
       },
       timeline: timeline,
       res: {
-        n: res.length,
-        area: tally(res, 'r_area'),
-        status: tally(res, 'r_status'),
-        age: tally(res, 'r_age'),
-        category: tally(res, 'r_category', true),
-        sources: tally(res, 'r_sources', true),
-        trust: tally(res, 'r_trust'),
-        pain: tally(res, 'r_pain', true),
-        recos: tally(res, 'r_recos'),
-        disappoint: tally(res, 'r_disappoint'),
-        ans: answeredCounts(res),
-        satisfaction: tally(res, 'r_satisfaction'),
-        interest: tally(res, 'r_interest'),
-        features: tally(res, 'r_features', true),
-        free: tally(res, 'r_free'),
-        pay: tally(res, 'r_pay')
+        n: res.length, started: resP.length,
+        area: tally(resP, 'r_area'),
+        status: tally(resP, 'r_status'),
+        age: tally(resP, 'r_age'),
+        category: tally(resP, 'r_category', true),
+        sources: tally(resP, 'r_sources', true),
+        trust: tally(resP, 'r_trust'),
+        pain: tally(resP, 'r_pain', true),
+        recos: tally(resP, 'r_recos'),
+        disappoint: tally(resP, 'r_disappoint'),
+        ans: answeredCounts(resP),
+        satisfaction: tally(resP, 'r_satisfaction'),
+        interest: tally(resP, 'r_interest'),
+        features: tally(resP, 'r_features', true),
+        free: tally(resP, 'r_free'),
+        pay: tally(resP, 'r_pay')
       },
       biz: {
-        n: biz.length,
-        type: tally(biz, 'b_type'),
-        ans: answeredCounts(biz),
-        role: tally(biz, 'b_role'),
-        branches: tally(biz, 'b_branches'),
-        age: tally(biz, 'b_age'),
-        channels: tally(biz, 'b_channels', true),
-        wom: tally(biz, 'b_wom'),
-        challenge: tally(biz, 'b_challenge'),
-        spend: tally(biz, 'b_spend'),
+        n: biz.length, started: bizP.length,
+        type: tally(bizP, 'b_type'),
+        ans: answeredCounts(bizP),
+        role: tally(bizP, 'b_role'),
+        branches: tally(bizP, 'b_branches'),
+        age: tally(bizP, 'b_age'),
+        channels: tally(bizP, 'b_channels', true),
+        wom: tally(bizP, 'b_wom'),
+        challenge: tally(bizP, 'b_challenge'),
+        spend: tally(bizP, 'b_spend'),
         priority: priority,
         priority_avg: pn ? Math.round((psum / pn) * 10) / 10 : null,
-        pay: tally(biz, 'b_pay'),
-        pilot: tally(biz, 'b_pilot'),
-        update: tally(biz, 'b_update'),
-        wrong_info: tally(biz, 'b_wrong_info'),
-        inquiries: tally(biz, 'b_inquiries', true),
-        inq_time: tally(biz, 'b_inq_time'),
-        tools: tally(biz, 'b_tools'),
-        tools_sat: tally(biz, 'b_tools_sat'),
-        goals: tally(biz, 'b_goals', true),
-        success: tally(biz, 'b_success', true)
+        pay: tally(bizP, 'b_pay'),
+        pilot: tally(bizP, 'b_pilot'),
+        update: tally(bizP, 'b_update'),
+        wrong_info: tally(bizP, 'b_wrong_info'),
+        inquiries: tally(bizP, 'b_inquiries', true),
+        inq_time: tally(bizP, 'b_inq_time'),
+        tools: tally(bizP, 'b_tools'),
+        tools_sat: tally(bizP, 'b_tools_sat'),
+        goals: tally(bizP, 'b_goals', true),
+        success: tally(bizP, 'b_success', true)
       },
       com: { n: com.length, type: tally(com, 'b_type') },
       findings: {
-        reco3: share(res, function (r) { return r.r_recos === '3_5' || r.r_recos === '6p'; }),
-        people_used: share(res, function (r) { return hasAny(r, 'r_sources', ['friends', 'groups']); }),
-        people_trust: share(res, function (r) { return r.r_trust === 'friends' || r.r_trust === 'groups'; }),
-        disappoint: share(res, function (r) { return r.r_disappoint === 'often' || r.r_disappoint === 'sometimes'; }),
-        info_pain: share(res, function (r) { return hasAny(r, 'r_pain', ['outdated', 'reviews', 'scattered']); }),
-        biz_priority7: share(biz.filter(function (r) { return r.b_priority; }), function (r) { return parseInt(r.b_priority, 10) >= 7; }),
-        biz_wom40: share(biz, function (r) { return r.b_wom === '40_60' || r.b_wom === '60p'; }),
-        biz_pilot: share(biz, function (r) { return r.b_pilot === 'yes' || r.b_pilot === 'maybe'; }),
-        biz_pays: share(biz, function (r) { return r.b_pay === 'monthly' || r.b_pay === 'commission'; }),
-        biz_pays_depends: share(biz, function (r) { return r.b_pay === 'depends'; }),
-        res_unsat: share(answered(res, 'r_satisfaction'), function (r) { return r.r_satisfaction === 'unsat' || r.r_satisfaction === 'very_unsat'; }),
-        res_interest: share(answered(res, 'r_interest'), function (r) { return r.r_interest === 'very' || r.r_interest === 'somewhat'; }),
-        res_free: share(answered(res, 'r_free'), function (r) { return r.r_free === 'definitely' || r.r_free === 'likely'; }),
-        res_pay: share(answered(res, 'r_pay'), function (r) { return r.r_pay === 'yes' || r.r_pay === 'maybe'; }),
-        biz_wrong_info: share(answered(biz, 'b_wrong_info'), function (r) { return r.b_wrong_info === 'often' || r.b_wrong_info === 'sometimes'; }),
-        biz_inq_1h: share(answered(biz, 'b_inq_time'), function (r) { return r.b_inq_time === '1_3' || r.b_inq_time === '3p'; }),
-        biz_no_tools: share(answered(biz, 'b_tools'), function (r) { return r.b_tools !== 'advanced'; })
+        reco3: share(answered(resP, 'r_recos'), function (r) { return r.r_recos === '3_5' || r.r_recos === '6p'; }),
+        people_used: share(answered(resP, 'r_sources'), function (r) { return hasAny(r, 'r_sources', ['friends', 'groups']); }),
+        people_trust: share(answered(resP, 'r_trust'), function (r) { return r.r_trust === 'friends' || r.r_trust === 'groups'; }),
+        disappoint: share(answered(resP, 'r_disappoint'), function (r) { return r.r_disappoint === 'often' || r.r_disappoint === 'sometimes'; }),
+        info_pain: share(answered(resP, 'r_pain'), function (r) { return hasAny(r, 'r_pain', ['outdated', 'reviews', 'scattered']); }),
+        biz_priority7: share(answered(bizP, 'b_priority'), function (r) { return parseInt(r.b_priority, 10) >= 7; }),
+        biz_wom40: share(answered(bizP, 'b_wom'), function (r) { return r.b_wom === '40_60' || r.b_wom === '60p'; }),
+        biz_pilot: share(answered(bizP, 'b_pilot'), function (r) { return r.b_pilot === 'yes' || r.b_pilot === 'maybe'; }),
+        biz_pays: share(answered(bizP, 'b_pay'), function (r) { return r.b_pay === 'monthly' || r.b_pay === 'commission'; }),
+        biz_pays_depends: share(answered(bizP, 'b_pay'), function (r) { return r.b_pay === 'depends'; }),
+        res_unsat: share(answered(resP, 'r_satisfaction'), function (r) { return r.r_satisfaction === 'unsat' || r.r_satisfaction === 'very_unsat'; }),
+        res_interest: share(answered(resP, 'r_interest'), function (r) { return r.r_interest === 'very' || r.r_interest === 'somewhat'; }),
+        res_free: share(answered(resP, 'r_free'), function (r) { return r.r_free === 'definitely' || r.r_free === 'likely'; }),
+        res_pay: share(answered(resP, 'r_pay'), function (r) { return r.r_pay === 'yes' || r.r_pay === 'maybe'; }),
+        biz_wrong_info: share(answered(bizP, 'b_wrong_info'), function (r) { return r.b_wrong_info === 'often' || r.b_wrong_info === 'sometimes'; }),
+        biz_inq_1h: share(answered(bizP, 'b_inq_time'), function (r) { return r.b_inq_time === '1_3' || r.b_inq_time === '3p'; }),
+        biz_no_tools: share(answered(bizP, 'b_tools'), function (r) { return r.b_tools !== 'advanced'; })
       }
     };
   }

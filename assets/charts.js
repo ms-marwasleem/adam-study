@@ -55,6 +55,7 @@
       tip(row, lbl + ': ' + v + (opts.raw ? '' : ' / ' + n));
       wrap.appendChild(row);
     });
+    if (opts.nLabel) wrap.appendChild(el('p', { class: 'n-label', text: opts.nLabel.replace('{n}', n) }));
     return wrap;
   }
 
